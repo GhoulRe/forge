@@ -16,6 +16,8 @@ import Skills from './Skills.jsx';
 import Mock from './Mock.jsx';
 import Games from './Games.jsx';
 import Library from './Library.jsx';
+import { loadCodeCM } from './CodeEditor.jsx';
+import { getEditorPref } from '../lib/editorPref.js';
 
 const GROUPS = [
   ['Study', [['dashboard', '📊', 'Dashboard'], ['plan', '🗓', '15-day plan'], ['library', '📚', 'My library'], ['qa', '💬', 'Interview Q&A'], ['notes', '📝', 'Notes & backup']]],
@@ -38,6 +40,12 @@ export default function Shell({ onOut }) {
   const inWork = r.view === 'practice' && r.a;
   const resume = findItem(S.cur, S.pads);
 
+  useEffect(() => { // warm up the code editor while the app is idle
+    if (getEditorPref() === 'simple') return undefined;
+    const go = () => loadCodeCM().catch(() => {}), idle = 'requestIdleCallback' in window;
+    const id = idle ? requestIdleCallback(go, { timeout: 4000 }) : setTimeout(go, 1500);
+    return () => (idle ? cancelIdleCallback(id) : clearTimeout(id));
+  }, []);
   useEffect(() => { if (!r.view) navigate(S.last && S.last !== '/' ? S.last : '/dashboard', true); }, [r.view]);
   useEffect(() => { // remember where you are (for "resume") and scroll to the top on every page change
     document.getElementById('main')?.scrollTo(0, 0); setOpen(false);

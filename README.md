@@ -47,6 +47,7 @@ The web app itself is light. Only Ollama uses real memory, and only while a mode
 - No model at all is fine: everything else works, with the 💡 hint ladder.
 
 ## More features
+- **Code editors**: practice exercises, day snippets, scratchpads and mock coding rounds all use CodeMirror 6 (undo/redo, bracket matching, auto-closing brackets, language-aware indent). Switch to the lighter built-in editor any time in Notes & backup, Code editor.
 - **Notes editor**: CodeMirror 6 with live preview (the engine Obsidian uses). Notes stay plain markdown; headings, bold, lists and code blocks are formatted as you type, marks are hidden on lines you are not editing, and fenced code is highlighted per language (JS/TS/JSX, HTML, CSS, JSON, loaded on demand). It loads only when you edit a note. If it ever fails to load, Forge falls back to a simpler built-in editor automatically.
 - **Notes**: each day has proper markdown notes (several per day, edit/preview, checklists, code blocks you can copy or save as runnable snippets).
 - **Zero in a day or a challenge**: explains topics, checks your notes and code, and quizzes you, with your day, notes and snippets as context.

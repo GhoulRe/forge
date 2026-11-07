@@ -170,3 +170,7 @@ html{-webkit-text-size-adjust:100%}button,a,input,select,textarea,summary{touch-
   .tools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.tools::-webkit-scrollbar{display:none}.tools .bt{flex:none}
 }
 @media(pointer:coarse){.bt small{display:none}}
+
+/* ===== CodeMirror code editor ===== */
+.ed>.cmfill{position:absolute;inset:0;height:auto}.ed .cmhost .cm-editor{height:100%}.edload{display:grid;place-items:center;color:var(--mu);font-size:13px}
+@media(max-width:900px){.ed .cm-gutters{display:none}}

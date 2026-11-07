@@ -4,6 +4,7 @@ import { md } from '../lib/md.js';
 import { seed } from '../lib/daycode.js';
 import Editor from './Editor.jsx';
 import Boundary from './Boundary.jsx';
+import { getEditorPref } from '../lib/editorPref.js';
 
 // CodeMirror is loaded on demand with ONE remembered attempt: if it is unavailable we stay on the simple editor (no swapping under your cursor).
 let cmLoad = null, cmFailed = false;
@@ -16,8 +17,8 @@ const TOOLS = [['H', '## ', '', 'Heading'], ['B', '**', '**', 'Bold'], ['I', '*'
 export default function DayNotes({ d }) {
   const { S, up, say } = useApp();
   const list = S.dn[d.n];
-  useEffect(() => { let on = true; if (!cmFailed) loadCM().then(c => on && setCM(() => c), () => on && setSimple(true)); return () => { on = false; }; }, []);
-  const [sel, setSel] = useState(null), [view, setView] = useState(false), [simple, setSimple] = useState(cmFailed), [CM, setCM] = useState(null), ta = useRef(), cm = useRef();
+  useEffect(() => { let on = true; if (!cmFailed && getEditorPref() !== 'simple') loadCM().then(c => on && setCM(() => c), () => on && setSimple(true)); return () => { on = false; }; }, []);
+  const [sel, setSel] = useState(null), [view, setView] = useState(false), [simple, setSimple] = useState(cmFailed || getEditorPref() === 'simple'), [CM, setCM] = useState(null), ta = useRef(), cm = useRef();
   useEffect(() => { // first visit: bring any older single note across
     if (!list) up(n => { const old = n.dnotes[d.n]; n.dn[d.n] = old ? [{ id: 'n0', t: 'Quick notes', b: old, ts: Date.now() }] : []; delete n.dnotes[d.n]; });
   }, [d.n]);

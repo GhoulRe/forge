@@ -1,11 +1,12 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { getEditorPref, setEditorPref } from '../lib/editorPref.js';
 import { useApp } from '../store.jsx';
 
 const FIELDS = [['intro', 'Introduce yourself (60 seconds)'], ['project', 'Your best project, STAR style'], ['bug', 'A hard bug you solved'], ['why', 'Why this role and company?']];
 
 export default function Notes() {
   const { S, up, say, user } = useApp();
-  const file = useRef();
+  const file = useRef(), [pref, setPref] = useState(getEditorPref());
   const set = (k, v) => up(n => { n.notes[k] = v; });
   const exportAll = () => {
     const a = document.createElement('a');
@@ -40,6 +41,9 @@ export default function Notes() {
       <div className="eb">Notes & backup</div><h1>Your story and notes</h1>
       {FIELDS.map(([k, t]) => <div key={k}><h3>{t}</h3><textarea className="na" rows={4} value={S.notes[k] || ''} onChange={e => set(k, e.target.value)} /></div>)}
       <h3>Scratch notes</h3><textarea className="na" rows={6} placeholder="Anything else…" value={S.notes.g || ''} onChange={e => set('g', e.target.value)} />
+      <h3>Code editor</h3>
+      <p className="mu">Notes and code use CodeMirror (proper undo, bracket matching, auto-closing brackets). If it ever misbehaves on your device, switch to the simple built-in editor. Reload the page after changing.</p>
+      <div className="ch">{[['cm', 'CodeMirror (recommended)'], ['simple', 'Simple editor']].map(([k, l]) => <button key={k} className={'bt' + (pref === k ? ' pri' : '')} onClick={() => { setEditorPref(k); setPref(k); say('Saved. Reload the page to apply.'); }}>{l}</button>)}</div>
       <h3>Backup & import</h3>
       <p className="mu">Your data is already saved to your account. Export a copy any time, or import progress from the old single-file plan (its exported JSON) or a Forge backup.</p>
       <div className="ch"><button className="bt" onClick={exportAll}>⬇ Export backup</button><button className="bt" onClick={() => file.current.click()}>⬆ Import progress</button><input ref={file} type="file" accept="application/json,.json" hidden onChange={importFile} /></div>

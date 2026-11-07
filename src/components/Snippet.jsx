@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as zero from '../lib/zero.js';
 import { useApp } from '../store.jsx';
 import { buildDoc } from '../lib/util.js';
-import Editor from './Editor.jsx';
+import CodeEditor from './CodeEditor.jsx';
 
 let RID = 100000; // run ids are unique across snippets so their messages never mix
 
@@ -45,7 +45,7 @@ export default function Snippet({ sn, onCode, onTitle, onDelete, onRun, ctxTask 
         <button className="bt" onClick={() => { navigator.clipboard?.writeText(sn.code); say('Copied'); }}>Copy</button>
         <button className="bt" onClick={() => { if (confirm('Delete this snippet?')) onDelete(); }} aria-label="Delete snippet">🗑</button>
       </div>
-      <div className="sned"><Editor value={sn.code} lang={sn.lang} onChange={onCode} onRun={run} /></div>
+      <div className="sned"><CodeEditor value={sn.code} lang={sn.lang} onChange={onCode} onRun={run} /></div>
       {ran && <div className="sout">
         {preview && <div className="hd" style={{ margin: '0 0 6px' }}><button className={'bt' + (tab === 'pv' ? ' pri' : '')} onClick={() => setTab('pv')}>Preview</button><button className={'bt' + (tab === 'co' ? ' pri' : '')} onClick={() => setTab('co')}>Console ({logs.length})</button></div>}
         {tab === 'co' && (logs.length ? logs.map((x, i) => <div key={i} className={'ln ' + x.k}>{x.s}</div>) : <span className="mu">No console output.</span>)}

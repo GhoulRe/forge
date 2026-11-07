@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import { useApp } from '../store.jsx';
 import { buildDoc, esc, bump } from '../lib/util.js';
 import { catalog } from '../data/items.js';
-import Editor from './Editor.jsx';
+import CodeEditor from './CodeEditor.jsx';
 import Coach from './Coach.jsx';
 import { VIZ } from './Viz.jsx';
 
@@ -101,7 +101,7 @@ export default function Workspace({ item, go, embedded }) {
           <button className="bt" onClick={() => { if (confirm('Reset this file to its starter code?')) up(n => { delete n.code[id]; }); }}>Reset</button>
           <button className="bt pri" onClick={run}>▶ Run <small>⌘↵</small></button>
         </div>
-        <Editor value={code} lang={item.lang} onChange={v => up(n => { n.code[id] = v; })} onRun={run} />
+        <CodeEditor value={code} lang={item.lang} onChange={v => up(n => { n.code[id] = v; })} onRun={run} />
         <div id="out">
           <div className="bar" id="tb">{tabs.map(([k, n, c]) => <button key={k} className={'tb' + (tab === k ? ' on' : '')} onClick={() => setTab(k)}>{n} {c !== '' ? `(${c})` : ''}</button>)}</div>
           <div id="ob" style={{ display: tab === 'pv' ? 'none' : 'block' }}>
