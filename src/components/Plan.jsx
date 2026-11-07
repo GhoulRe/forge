@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useApp } from '../store.jsx';
 import { days } from '../data/plan.js';
 import { bump } from '../lib/util.js';
@@ -23,6 +23,7 @@ function DayPage({ d, tab }) {
   const tabs = [['plan', 'Plan'], ['notes', 'Notes (' + nn + ')'], ['code', 'Code (' + (S.dcode[d.n] ? S.dcode[d.n].length : (d.coding || []).length) + ')'], ['res', 'Resources (' + (S.dres[d.n] || []).length + ')'], ...(S.unplugged ? [] : [['zero', '🤖 Zero']])];
   const key = { notes: 'notes', code: 'code', resources: 'res', zero: 'zero' }[tab] || 'plan';
   const c = doneCount(S, d), [st, label] = status(S, d), prev = days[d.n - 2], next = days[d.n];
+  useEffect(() => { document.querySelector('.dt2.on')?.scrollIntoView({ inline: 'center', block: 'nearest' }); }, [key]); // phones: keep the active tab in view
   const href = k => '/plan/' + d.n + (k === 'plan' ? '' : '/' + (k === 'res' ? 'resources' : k));
   return (
     <div className="page daypage">

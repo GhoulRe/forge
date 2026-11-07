@@ -46,6 +46,7 @@ export default function Shell({ onOut }) {
 
   const go = (v, id) => navigate(pathFor(v, id, S.cur));
   const addPad = lang => { const id = 'pad' + Date.now(); up(n => { n.pads.push({ id, tr: 'Scratchpads', t: 'Scratchpad ' + (n.pads.length + 1), lang, code: PAD[lang] }); }); navigate('/practice/' + id); };
+  const toggleUnplugged = () => up(n => { n.unplugged = !n.unplugged; });
   const logout = async () => { await backend.logout().catch(() => {}); onOut(); };
   const toggleTheme = () => { const t = theme === 'dark' ? 'light' : 'dark'; setTheme(t); document.documentElement.dataset.theme = t; try { localStorage.setItem('forge.theme', t); } catch { /* private mode */ } };
 
@@ -70,10 +71,10 @@ export default function Shell({ onOut }) {
         <button className="bt menu" onClick={() => setOpen(!open)} aria-label="Menu">☰</button>
         <Link to="/dashboard" className="logo">Forge<b>_</b></Link>
         <span id="crumb">{crumb}</span>
-        <span id="sv">{sv}</span><span className="pg" title="Current streak">🔥 {stats(S.days).current}</span><span className="pg" title={user}>{user.split('@')[0]}</span>
-        <button className="bt" onClick={toggleTheme} title="Switch light / dark theme" aria-label="Switch theme">{theme === 'dark' ? '☀ Light' : '🌙 Dark'}</button>
-        <button className={'bt' + (S.unplugged ? ' pri' : '')} title="Unplugged: no hints, no Zero, no solutions" onClick={() => up(n => { n.unplugged = !n.unplugged; })}>🔌 {S.unplugged ? 'Unplugged' : 'Plugged in'}</button>
-        <button className="bt" onClick={logout}>Log out</button>
+        <span id="sv" className="hide-m">{sv}</span><span className="pg" title="Current streak">🔥 {stats(S.days).current}</span><span className="pg hide-m" title={user}>{user.split('@')[0]}</span>
+        <button className="bt" onClick={toggleTheme} title="Switch light / dark theme" aria-label="Switch theme">{theme === 'dark' ? '☀' : '🌙'}<span className="hide-m"> {theme === 'dark' ? 'Light' : 'Dark'}</span></button>
+        <button className={'bt hide-m' + (S.unplugged ? ' pri' : '')} title="Unplugged: no hints, no Zero, no solutions" onClick={toggleUnplugged}>🔌 {S.unplugged ? 'Unplugged' : 'Plugged in'}</button>
+        <button className="bt hide-m" onClick={logout}>Log out</button>
       </header>
       <nav id="nav" aria-label="Main">
         <Link to={'/practice/' + encodeURIComponent(S.cur)} className="resume"><span className="eb">▶ Resume</span><b>{resume.t}</b><small>Pick up where you left off</small></Link>
@@ -81,7 +82,15 @@ export default function Shell({ onOut }) {
           {items.map(([k, ic, t]) => <Link key={k} to={'/' + k} className={'it' + (r.view === k ? ' on' : '')} aria-current={r.view === k ? 'page' : undefined}>{ic} {t}</Link>)}</div>)}
         <h4>Scratchpads<span><button onClick={() => addPad('js')}>+ JS</button><button onClick={() => addPad('html')}>+ HTML</button><button onClick={() => addPad('react')}>+ React</button></span></h4>
         {S.pads.map(p => <Link key={p.id} to={'/practice/' + p.id} className={'it' + (inWork && r.a === p.id ? ' on' : '')}>{p.t}</Link>)}
+        <div className="acct"> {/* account controls live here on phones, where the header is too small for them */}
+          <h4>Account</h4><div className="acct-user">{user}</div>
+          <button className="bt" onClick={toggleTheme}>{theme === 'dark' ? '☀ Switch to light theme' : '🌙 Switch to dark theme'}</button>
+          <button className={'bt' + (S.unplugged ? ' pri' : '')} onClick={toggleUnplugged}>🔌 {S.unplugged ? 'Unplugged: hints and Zero off' : 'Plugged in'}</button>
+          <button className="bt" onClick={logout}>Log out</button>
+          <small className="mu">{sv}</small>
+        </div>
       </nav>
+      {open && <div className="backdrop" onClick={() => setOpen(false)} />}
       <main id="main">{V}</main>
       {toast && <div id="toast" className="on" role="status">{toast}</div>}
     </div>

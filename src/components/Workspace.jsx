@@ -14,7 +14,7 @@ export default function Workspace({ item, go, embedded }) {
   const R = useRef({ logs: saved?.logs || [], tests: saved?.tests || [] });
   const [, tick] = useReducer(x => x + 1, 0);
   const [tab, setTab] = useState(saved?.tab || (item.lang === 'js' ? 'co' : 'pv'));
-  const [sol, setSol] = useState(false);
+  const [sol, setSol] = useState(false), [pane, setPane] = useState(item.body ? 'learn' : 'code'); // phones show one pane at a time
   const fr = useRef(), rid = useRef(0), running = useRef(false), L = useRef();
   L.current = { S, up, say, item, tab };
 
@@ -68,7 +68,9 @@ export default function Workspace({ item, go, embedded }) {
   const pad = S.pads.find(p => p.id === id);
 
   return (
-    <div className="work">
+    <div className="wk">
+      <div className="paneswitch" role="tablist"><button role="tab" aria-selected={pane === 'learn'} className={pane === 'learn' ? 'on' : ''} onClick={() => setPane('learn')}>📖 Learn</button><button role="tab" aria-selected={pane === 'code'} className={pane === 'code' ? 'on' : ''} onClick={() => setPane('code')}>⌨ Code &amp; run</button></div>
+      <div className="work" data-pane={pane}>
       <section id="learn">
         {!embedded && <button className="bt" onClick={() => go('practice')}>← All practice</button>}
         {item.body ? <>
@@ -109,6 +111,7 @@ export default function Workspace({ item, go, embedded }) {
           <iframe ref={fr} id="fr" className={tab === 'pv' ? 'show' : ''} sandbox="allow-scripts" title="Preview" />
         </div>
       </section>
+      </div>
     </div>
   );
 }

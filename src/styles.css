@@ -130,3 +130,43 @@ a.dc{text-decoration:none;color:inherit;display:block;border-left:4px solid var(
 
 /* ===== CodeMirror host ===== */
 .cmhost{height:100%}.cmhost .cm-editor{height:100%}
+
+/* ===== Mobile pass ===== */
+html{-webkit-text-size-adjust:100%}button,a,input,select,textarea,summary{touch-action:manipulation}
+@supports(height:100dvh){html,body{height:100dvh}}
+.wk{height:100%;display:flex;flex-direction:column;min-height:0}.wk .work{flex:1;min-height:0;height:auto}
+.paneswitch,.backdrop,.acct{display:none}
+@media(max-width:900px){
+  #app{grid-template-columns:minmax(0,1fr)}
+  header{gap:8px;padding:0 10px;min-width:0}header .hide-m{display:none!important}header .logo{margin-right:0}#crumb{min-width:0}
+  #nav{overscroll-behavior:contain;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+  .backdrop{display:block;position:fixed;inset:calc(48px + env(safe-area-inset-top,0px)) 0 0 0;background:#000a;z-index:14}
+  .acct{display:block;margin-top:22px;border-top:1px solid var(--ln);padding-top:2px}.acct .bt{display:block;width:100%;margin:6px 0;text-align:left}.acct-user{padding:6px 10px;font-weight:700;word-break:break-all}
+  .page{padding:16px 14px 44px}.page h1{font-size:22px}#learn{padding:16px 14px 30px}
+  .paneswitch{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--ln);background:var(--pn)}
+  .paneswitch button{flex:1;border:1px solid var(--ln);background:var(--p2);color:var(--tx);border-radius:10px;padding:10px;font-weight:700}.paneswitch button.on{background:var(--ac);border-color:var(--ac);color:#1b1007}
+  .work{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+  .work[data-pane=learn] #code{display:none}.work[data-pane=code] #learn{display:none}
+  #code{height:100%;border:0}
+  .daytabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}.daytabs::-webkit-scrollbar{display:none}.dt2{white-space:nowrap;flex:none}
+  input,textarea,select{font-size:16px}.ed textarea,.ed pre{font-size:16px}.cmhost .cm-editor{font-size:16px!important}
+  .row-it{flex-wrap:wrap}.g3,.top,.next{grid-template-columns:1fr}.snip2 .hd .stitle{flex-basis:100%}.mdbox{height:58vh}.sned{height:240px}
+  input[type=search]{max-width:none;min-width:0;flex-basis:100%}
+}
+@media(pointer:coarse){.bt,.dt2,a.it,.nx,.row-it{min-height:44px}.bt{padding-top:10px;padding-bottom:10px}.tools .bt{min-width:44px}.tk{padding:12px}}
+
+/* ===== Mobile pass 2 ===== */
+@media(max-width:900px){
+  input:not([type=checkbox]):not([type=range]):not([type=radio]),textarea,select{font-size:16px!important}
+  header .bt{min-height:38px;padding-top:6px;padding-bottom:6px}
+  #nav h4{flex-wrap:wrap;gap:6px}#nav h4 button{white-space:nowrap}
+}
+@media(pointer:coarse){#nav h4 button{min-height:40px;min-width:48px;padding:6px 12px}.tr{min-height:44px}.hd .bt{min-height:42px}}
+
+/* ===== Mobile pass 3 ===== */
+@media(max-width:900px){
+  #code{grid-template-rows:auto minmax(0,1fr) minmax(0,.8fr)}
+  .bar{min-height:48px;padding:4px 10px}
+  .tools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.tools::-webkit-scrollbar{display:none}.tools .bt{flex:none}
+}
+@media(pointer:coarse){.bt small{display:none}}
