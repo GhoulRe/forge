@@ -6,6 +6,7 @@ import { removePad } from '../lib/pads.js';
 import CodeEditor from './CodeEditor.jsx';
 import Coach from './Coach.jsx';
 import { VIZ } from './Viz.jsx';
+import { useFullscreen } from '../lib/useFullscreen.js';
 
 // Learn pane + editor + sandboxed runner + tests, for lessons, challenges, interview problems and scratchpads.
 export default function Workspace({ item, go, embedded }) {
@@ -17,6 +18,7 @@ export default function Workspace({ item, go, embedded }) {
   const [tab, setTab] = useState(saved?.tab || (item.lang === 'js' ? 'co' : 'pv'));
   const [sol, setSol] = useState(false), [pane, setPane] = useState(item.body ? 'learn' : 'code'); // phones show one pane at a time
   const fr = useRef(), rid = useRef(0), running = useRef(false), L = useRef();
+  const { fs, toggle: toggleFs, ref: codeRef } = useFullscreen();
   L.current = { S, up, say, item, tab };
 
   const finish = () => {
@@ -97,10 +99,11 @@ export default function Workspace({ item, go, embedded }) {
         {sol && <pre id="sol" className="mono" dangerouslySetInnerHTML={{ __html: '<b>One possible approach</b>\n' + esc(item.sol) }} />}
         <div className="ch">{nb(-1) && <button className="bt" onClick={() => go('work', nb(-1).id)}>← {nb(-1).t}</button>}{nb(1) && <button className="bt" onClick={() => go('work', nb(1).id)}>{nb(1).t} →</button>}</div>
       </section>
-      <section id="code">
+      <section id="code" ref={codeRef} className={fs ? 'fs-focus' : ''}>
         <div className="bar">
-          <span className="f">{item.lang === 'html' ? 'index.html' : item.lang === 'react' ? 'App.jsx' : 'main.js'}</span>
+          <span className="f">{fs && item.t ? <span style={{ color: 'var(--tx)', marginRight: 6 }}>{item.t} ·</span> : null}{item.lang === 'html' ? 'index.html' : item.lang === 'react' ? 'App.jsx' : 'main.js'}</span>
           <button className="bt" onClick={() => { if (confirm('Reset this file to its starter code?')) up(n => { delete n.code[id]; }); }}>Reset</button>
+          <button className={'bt' + (fs ? ' pri' : '')} onClick={toggleFs} title={fs ? 'Exit full screen (Esc)' : 'Full screen focus (Esc to exit)'} aria-label={fs ? 'Exit full screen' : 'Full screen'}>{fs ? '↙ Exit full screen' : '⛶ Full screen'}</button>
           <button className="bt pri" onClick={run}>▶ Run <small>⌘↵</small></button>
         </div>
         <CodeEditor value={code} lang={item.lang} onChange={v => up(n => { n.code[id] = v; })} onRun={run} />

@@ -3,6 +3,7 @@ import * as zero from '../lib/zero.js';
 import { useApp } from '../store.jsx';
 import { buildDoc } from '../lib/util.js';
 import CodeEditor from './CodeEditor.jsx';
+import { useFullscreen } from '../lib/useFullscreen.js';
 
 let RID = 100000; // run ids are unique across snippets so their messages never mix
 
@@ -12,6 +13,7 @@ export default function Snippet({ sn, onCode, onTitle, onDelete, onRun, ctxTask 
   const [ai, setAi] = useState(null); // Zero's review of this snippet: { busy } | { text } | { err }
   const fr = useRef(), rid = useRef(0);
   const [logs, setLogs] = useState([]), [tab, setTab] = useState('co'), [ran, setRan] = useState(false);
+  const { fs, toggle: toggleFs, ref: snipRef } = useFullscreen();
   useEffect(() => {
     const on = e => {
       const d = e.data;
@@ -36,13 +38,14 @@ export default function Snippet({ sn, onCode, onTitle, onDelete, onRun, ctxTask 
   };
   const preview = sn.lang !== 'js';
   return (
-    <div className="snip2">
+    <div ref={snipRef} className={`snip2 ${fs ? 'fs-focus' : ''}`}>
       <div className="hd" style={{ margin: '0 0 8px' }}>
         <input className="stitle" value={sn.t} onChange={e => onTitle(e.target.value)} aria-label="Snippet title" />
         <span className="pill">{sn.lang === 'js' ? 'JavaScript' : sn.lang === 'html' ? 'HTML' : 'React'}</span>
         <button className="bt pri" onClick={run}>▶ Run</button>
         {!S.unplugged && <button className="bt" disabled={ai?.busy} onClick={ask} title="Ask your local model to review this snippet">🤖 Check with Zero</button>}
         <button className="bt" onClick={() => { navigator.clipboard?.writeText(sn.code); say('Copied'); }}>Copy</button>
+        <button className={'bt' + (fs ? ' pri' : '')} onClick={toggleFs} title={fs ? 'Exit full screen (Esc)' : 'Full screen focus (Esc to exit)'} aria-label={fs ? 'Exit full screen' : 'Full screen'}>{fs ? '↙ Exit full screen' : '⛶ Full screen'}</button>
         <button className="bt" onClick={() => { if (confirm('Delete this snippet?')) onDelete(); }} aria-label="Delete snippet">🗑</button>
       </div>
       <div className="sned"><CodeEditor value={sn.code} lang={sn.lang} onChange={onCode} onRun={run} /></div>

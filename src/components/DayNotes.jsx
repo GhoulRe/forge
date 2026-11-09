@@ -5,6 +5,7 @@ import { seed } from '../lib/daycode.js';
 import Editor from './Editor.jsx';
 import Boundary from './Boundary.jsx';
 import { getEditorPref } from '../lib/editorPref.js';
+import { useFullscreen } from '../lib/useFullscreen.js';
 
 // CodeMirror is loaded on demand with ONE remembered attempt: if it is unavailable we stay on the simple editor (no swapping under your cursor).
 let cmLoad = null, cmFailed = false;
@@ -17,6 +18,7 @@ const TOOLS = [['H', '## ', '', 'Heading'], ['B', '**', '**', 'Bold'], ['I', '*'
 export default function DayNotes({ d }) {
   const { S, up, say } = useApp();
   const list = S.dn[d.n];
+  const { fs, toggle: toggleFs, ref: notesRef } = useFullscreen();
   useEffect(() => { let on = true; if (!cmFailed && getEditorPref() !== 'simple') loadCM().then(c => on && setCM(() => c), () => on && setSimple(true)); return () => { on = false; }; }, []);
   const [sel, setSel] = useState(null), [view, setView] = useState(false), [simple, setSimple] = useState(cmFailed || getEditorPref() === 'simple'), [CM, setCM] = useState(null), ta = useRef(), cm = useRef();
   useEffect(() => { // first visit: bring any older single note across
@@ -40,12 +42,13 @@ export default function DayNotes({ d }) {
     else { up(n => { n.dcode[d.n] = [...(n.dcode[d.n] || seed(d)), { id: 'x' + Date.now(), t: (note.t || 'Note') + ' · snippet', lang: blk.lang, code: blk.code }]; }); say('Saved to the Code tab'); }
   };
   return (
-    <div>
+    <div ref={notesRef} className={`daynotes-wrap ${fs ? 'fs-focus' : ''}`}>
       <div className="hd">{notes.map(x => <button key={x.id} className={'bt' + (note && x.id === note.id ? ' pri' : '')} onClick={() => { setSel(x.id); setView(!!x.b.trim()); }}>{x.t || 'Untitled'}</button>)}<button className="bt" onClick={add}>+ New note</button></div>
       {!note ? <p className="mu">No notes for this day yet. Create one: use headings, lists, checklists and code blocks. Code blocks can be saved as runnable snippets.</p> : <>
         <div className="hd">
           <input className="stitle" value={note.t} onChange={e => edit(note.id, x => { x.t = e.target.value; })} aria-label="Note title" />
           <button className={'bt' + (!view ? ' pri' : '')} onClick={() => setView(false)}>Edit</button><button className={'bt' + (view ? ' pri' : '')} onClick={() => setView(true)}>Preview</button>
+          <button className={'bt' + (fs ? ' pri' : '')} onClick={toggleFs} title={fs ? 'Exit full screen (Esc)' : 'Full screen focus (Esc to exit)'} aria-label={fs ? 'Exit full screen' : 'Full screen'}>{fs ? '↙ Exit full screen' : '⛶ Full screen'}</button>
           <button className="bt" aria-label="Delete note" onClick={() => { if (confirm('Delete this note?')) { up(n => { n.dn[d.n] = n.dn[d.n].filter(x => x.id !== note.id); }); setSel(null); } }}>🗑</button>
         </div>
         {view ? <div className="mdv" onClick={act} dangerouslySetInnerHTML={{ __html: html.html || '<p class="mu">Nothing written yet.</p>' }} /> : <>
@@ -54,7 +57,7 @@ export default function DayNotes({ d }) {
             if (simple) return simpleEd;
             if (!CM) return <div className="mdbox mu" style={{ padding: 14 }}>Loading editor…</div>;
             return <Boundary fallback={simpleEd}><div className="mdbox"><CM key={note.id} value={note.b} viewRef={cm} onFail={() => setSimple(true)} onChange={v => edit(note.id, x => { x.b = v; })} onPreview={() => setView(true)} /></div></Boundary>; })()}
-          <small className="mu">{note.b.trim() ? note.b.trim().split(/\s+/).length : 0} words · live formatting · code in ``` fences is highlighted · ⌘/Ctrl + Enter for preview · saved automatically</small></>}
+          <small className="mu">{note.b.trim() ? note.b.trim().split(/\s+/).length : 0} words · live formatting · code in ``` fences is highlighted · ⌘/Ctrl + Enter for preview · saved automatically{fs ? ' · Esc to exit' : ''}</small></>}
       </>}
     </div>
   );
