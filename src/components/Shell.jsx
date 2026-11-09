@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { backend } from '../backend.js';
 import { useApp } from '../store.jsx';
-import { catalog, findItem } from '../data/items.js';
+import { catalog, findItem, lessons } from '../data/items.js';
+import { removePad } from '../lib/pads.js';
 import { stats } from '../lib/util.js';
 import { parse, pathFor } from '../lib/route.js';
 import { navigate, usePath } from '../router.js';
@@ -33,7 +34,7 @@ const PAD = {
 const NotFound = () => <div className="page"><h1>Page not found</h1><p className="mu">That address does not exist. <Link to="/dashboard" style={{ color: 'var(--ac)' }}>Go to the dashboard</Link></p></div>;
 
 export default function Shell({ onOut }) {
-  const { S, up, sv, toast, user } = useApp();
+  const { S, up, say, sv, toast, user } = useApp();
   const path = usePath(), r = parse(path);
   const [open, setOpen] = useState(false), [theme, setTheme] = useState(document.documentElement.dataset.theme || 'dark');
   const exists = id => catalog.some(i => i.id === id) || S.pads.some(p => p.id === id);
@@ -54,6 +55,12 @@ export default function Shell({ onOut }) {
 
   const go = (v, id) => navigate(pathFor(v, id, S.cur));
   const addPad = lang => { const id = 'pad' + Date.now(); up(n => { n.pads.push({ id, tr: 'Scratchpads', t: 'Scratchpad ' + (n.pads.length + 1), lang, code: PAD[lang] }); }); navigate('/practice/' + id); };
+  const deletePad = p => {
+    if (!window.confirm(`Delete "${p.t}"? Its code is removed and cannot be recovered.`)) return;
+    up(n => removePad(n, p.id, lessons[0].id));
+    if (inWork && r.a === p.id) navigate('/practice');
+    say('Scratchpad deleted');
+  };
   const toggleUnplugged = () => up(n => { n.unplugged = !n.unplugged; });
   const logout = async () => { await backend.logout().catch(() => {}); onOut(); };
   const toggleTheme = () => { const t = theme === 'dark' ? 'light' : 'dark'; setTheme(t); document.documentElement.dataset.theme = t; try { localStorage.setItem('forge.theme', t); } catch { /* private mode */ } };
@@ -89,7 +96,11 @@ export default function Shell({ onOut }) {
         {GROUPS.map(([g, items]) => <div key={g}><h4>{g}</h4>
           {items.map(([k, ic, t]) => <Link key={k} to={'/' + k} className={'it' + (r.view === k ? ' on' : '')} aria-current={r.view === k ? 'page' : undefined}>{ic} {t}</Link>)}</div>)}
         <h4>Scratchpads<span><button onClick={() => addPad('js')}>+ JS</button><button onClick={() => addPad('html')}>+ HTML</button><button onClick={() => addPad('react')}>+ React</button></span></h4>
-        {S.pads.map(p => <Link key={p.id} to={'/practice/' + p.id} className={'it' + (inWork && r.a === p.id ? ' on' : '')}>{p.t}</Link>)}
+        {S.pads.map(p => (
+          <div key={p.id} className="padrow">
+            <Link to={'/practice/' + p.id} className={'it' + (inWork && r.a === p.id ? ' on' : '')}>{p.t}</Link>
+            <button className="padx" aria-label={'Delete ' + p.t} title="Delete scratchpad" onClick={() => deletePad(p)}>🗑</button>
+          </div>))}
         <div className="acct"> {/* account controls live here on phones, where the header is too small for them */}
           <h4>Account</h4><div className="acct-user">{user}</div>
           <button className="bt" onClick={toggleTheme}>{theme === 'dark' ? '☀ Switch to light theme' : '🌙 Switch to dark theme'}</button>

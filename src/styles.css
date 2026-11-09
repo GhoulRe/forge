@@ -174,3 +174,9 @@ html{-webkit-text-size-adjust:100%}button,a,input,select,textarea,summary{touch-
 /* ===== CodeMirror code editor ===== */
 .ed>.cmfill{position:absolute;inset:0;height:auto}.ed .cmhost .cm-editor{height:100%}.edload{display:grid;place-items:center;color:var(--mu);font-size:13px}
 @media(max-width:900px){.ed .cm-gutters{display:none}}
+
+/* ===== Delete scratchpad ===== */
+.padrow{display:flex;align-items:center;gap:2px}.padrow .it{flex:1;min-width:0;width:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.padx{border:0;background:none;color:var(--mu);opacity:0;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:13px}
+.padrow:hover .padx,.padx:focus-visible{opacity:1}.padx:hover{color:var(--bad);background:var(--p2)}
+@media(hover:none),(max-width:900px){.padx{opacity:.85;min-width:44px;min-height:44px}}

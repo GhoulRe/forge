@@ -1,7 +1,8 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { useApp } from '../store.jsx';
 import { buildDoc, esc, bump } from '../lib/util.js';
-import { catalog } from '../data/items.js';
+import { catalog, lessons } from '../data/items.js';
+import { removePad } from '../lib/pads.js';
 import CodeEditor from './CodeEditor.jsx';
 import Coach from './Coach.jsx';
 import { VIZ } from './Viz.jsx';
@@ -81,6 +82,7 @@ export default function Workspace({ item, go, embedded }) {
           <div className="eb" style={{ marginTop: 14 }}>Scratchpad</div>
           <h1><input value={pad?.t || ''} aria-label="Scratchpad name" onChange={e => up(n => { n.pads.find(p => p.id === id).t = e.target.value || 'Untitled'; })} /></h1>
           <p className="mu">Your own sandbox. It is saved automatically and stays in the sidebar.</p>
+          <button className="bt" onClick={() => { if (window.confirm(`Delete "${pad?.t || 'this scratchpad'}"? Its code is removed and cannot be recovered.`)) { up(n => removePad(n, id, lessons[0].id)); say('Scratchpad deleted'); go('practice'); } }}>🗑 Delete this scratchpad</button>
         </>}
         {S.unplugged && !embedded && <p className="mu">🔌 Unplugged: no hints, no Zero, no solutions. Just you and the problem.</p>}
         {Viz && <Viz />}
