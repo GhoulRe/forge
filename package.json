@@ -10,10 +10,28 @@
     "start": "node server/index.cjs"
   },
   "dependencies": {
-    "react": "^18.3.1", "react-dom": "^18.3.1",
-    "@codemirror/state": "^6.4.1", "@codemirror/view": "^6.34.1", "@codemirror/commands": "^6.6.2", "@codemirror/autocomplete": "^6.18.0", "@codemirror/language": "^6.10.3",
-    "@codemirror/lang-markdown": "^6.3.0", "@codemirror/lang-javascript": "^6.2.2", "@codemirror/lang-html": "^6.4.9", "@codemirror/lang-css": "^6.3.0", "@lezer/highlight": "^1.2.1",
-    "firebase": "^11.0.0"
+    "@codemirror/autocomplete": "^6.18.0",
+    "@codemirror/commands": "^6.6.2",
+    "@codemirror/lang-css": "^6.3.0",
+    "@codemirror/lang-html": "^6.4.9",
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@codemirror/lang-markdown": "^6.3.0",
+    "@codemirror/language": "^6.10.3",
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/view": "^6.34.1",
+    "@lezer/highlight": "^1.2.1",
+    "firebase": "^11.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
-  "devDependencies": { "@vitejs/plugin-react": "^4.3.1", "concurrently": "^9.0.1", "vite": "^5.4.8" }
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@tailwindcss/vite": "^4.3.5",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.6.2",
+    "concurrently": "^9.0.1",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^4.3.5",
+    "vite": "^5.4.8"
+  }
 }

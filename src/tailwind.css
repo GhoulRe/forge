@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* ── Custom theme tokens (available as Tailwind utilities) ── */
+@theme {
+  --color-mint:     #00dc82;
+  --color-amber:    #ff7849;
+  --color-obsidian: #07080a;
+  --color-orange:   #ff7849;
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
