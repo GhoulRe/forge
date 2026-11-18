@@ -42,7 +42,7 @@ export default function DayNotes({ d }) {
     else { up(n => { n.dcode[d.n] = [...(n.dcode[d.n] || seed(d)), { id: 'x' + Date.now(), t: (note.t || 'Note') + ' · snippet', lang: blk.lang, code: blk.code }]; }); say('Saved to the Code tab'); }
   };
   return (
-    <div ref={notesRef} className={`daynotes-wrap ${fs ? 'fs-focus' : ''}`}>
+    <div ref={notesRef} className={`tab-content daynotes-wrap ${fs ? 'fs-focus' : ''}`}>
       <div className="hd">{notes.map(x => <button key={x.id} className={'bt' + (note && x.id === note.id ? ' pri' : '')} onClick={() => { setSel(x.id); setView(!!x.b.trim()); }}>{x.t || 'Untitled'}</button>)}<button className="bt" onClick={add}>+ New note</button></div>
       {!note ? <p className="mu">No notes for this day yet. Create one: use headings, lists, checklists and code blocks. Code blocks can be saved as runnable snippets.</p> : <>
         <div className="hd">

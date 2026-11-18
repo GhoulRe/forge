@@ -16,7 +16,7 @@ export default function DayResources({ d }) {
   };
   const sug = (SUGGEST[d.phase] || []).filter(([, url]) => !list.some(r => r.u === url));
   return (
-    <div>
+    <div className="tab-content resources-tab">
       <form onSubmit={add} className="rform">
         <input placeholder="Title (optional)" value={t} onChange={e => setT(e.target.value)} aria-label="Resource title" />
         <input placeholder="https://… link" value={u} onChange={e => setU(e.target.value)} aria-label="Resource link" required />

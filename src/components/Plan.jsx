@@ -126,13 +126,13 @@ function DayPage({ d, tab }) {
       {key === 'plan' && (
         <>
           {/* Time allocation banner */}
-          <div className="hint" style={{ borderLeft: '3px solid var(--ac)', margin: '12px 0 18px' }}>
+          <div className="hint plan-time" style={{ borderLeft: '3px solid var(--ac)', margin: '12px 0 18px' }}>
             <b>⏳ Target Time Allocation:</b> {d.timeAllocation}
           </div>
 
           {/* 1. Learning Objectives */}
           {d.objectives && d.objectives.length > 0 && (
-            <div style={{ marginBottom: 20 }}>
+            <div className="plan-section objectives-section" style={{ marginBottom: 20 }}>
               <div className="eb">1. Learning Objectives</div>
               <ul className="bl" style={{ marginTop: 6 }}>
                 {d.objectives.map((obj, i) => (
@@ -144,7 +144,7 @@ function DayPage({ d, tab }) {
 
           {/* 2. Concepts to Understand */}
           {d.concepts && d.concepts.length > 0 && (
-            <div style={{ marginBottom: 20 }}>
+            <div className="plan-section concepts-section" style={{ marginBottom: 20 }}>
               <div className="eb">2. Key Concepts to Master</div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
                 {d.concepts.map((c, i) => (
@@ -157,11 +157,11 @@ function DayPage({ d, tab }) {
           )}
 
           {/* 3. Practical Tasks Checklist */}
-          <div style={{ marginBottom: 22 }}>
+          <div className="plan-section tasks-section" style={{ marginBottom: 22 }}>
             <div className="eb">3. Practical Learning Tasks</div>
             <div style={{ marginTop: 8 }}>
               {d.tasks.map((t, i) => (
-                <label key={i} className="tk" style={{ cursor: 'pointer', padding: '8px 0', borderBottom: '1px solid var(--ln)' }}>
+                <label key={i} className={'tk' + (S.tasks[d.n + '-' + i] ? ' is-done' : '')}>
                   <input
                     type="checkbox"
                     checked={!!S.tasks[d.n + '-' + i]}
@@ -176,7 +176,7 @@ function DayPage({ d, tab }) {
           </div>
 
           {/* 8. Daily Completion Criterion */}
-          <div className="task" style={{ padding: 14, margin: '20px 0' }}>
+          <div className="task completion-criterion" style={{ padding: 14, margin: '20px 0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <b>🎯 End-of-Day Completion Criterion:</b>
@@ -201,7 +201,7 @@ function DayPage({ d, tab }) {
 
       {/* TAB 2: DAY Q&A */}
       {key === 'qa' && (
-        <div>
+        <div className="tab-content qa-tab">
           <div className="eb" style={{ marginBottom: 8 }}>Day {d.n} Interview Questions</div>
           <h3>Practice Answering Out Loud</h3>
           <p className="mu" style={{ fontSize: 13, marginBottom: 14 }}>
@@ -294,7 +294,7 @@ function DayPage({ d, tab }) {
 
       {/* TAB 3: CODING & LABS */}
       {key === 'coding' && (
-        <div>
+        <div className="tab-content coding-tab">
           <div className="eb" style={{ marginBottom: 8 }}>Day {d.n} Coding &amp; Machine Coding</div>
           <h3>Practical Coding Exercises</h3>
 
@@ -341,12 +341,18 @@ function DayPage({ d, tab }) {
               </Link>
             </div>
           )}
+
+          <section className="day-codebook">
+            <div className="eb">Saved coding notebook</div>
+            <p className="mu">Work through today’s prompts here. Your snippets stay saved with this day.</p>
+            <DayCode d={d} />
+          </section>
         </div>
       )}
 
       {/* TAB 4: RECALL QUIZ */}
       {key === 'recall' && (
-        <div>
+        <div className="tab-content recall-tab">
           <div className="eb" style={{ marginBottom: 8 }}>Day {d.n} Rapid Recall</div>
           <h3>Spaced Repetition &amp; Memory Check</h3>
           <p className="mu" style={{ fontSize: 13, marginBottom: 16 }}>
