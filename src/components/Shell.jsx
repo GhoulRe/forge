@@ -10,6 +10,8 @@ import Link from './Link.jsx';
 import Dashboard from './Dashboard.jsx';
 import Plan from './Plan.jsx';
 import QA from './QA.jsx';
+import CodingBank from './CodingBank.jsx';
+import Revision from './Revision.jsx';
 import Practice from './Practice.jsx';
 import Workspace from './Workspace.jsx';
 import Notes from './Notes.jsx';
@@ -21,97 +23,258 @@ import { loadCodeCM } from './CodeEditor.jsx';
 import { getEditorPref } from '../lib/editorPref.js';
 
 const GROUPS = [
-  ['Study', [['dashboard', '📊', 'Dashboard'], ['plan', '🗓', '15-day plan'], ['library', '📚', 'My library'], ['qa', '💬', 'Interview Q&A'], ['notes', '📝', 'Notes & backup']]],
-  ['Practice', [['practice', '🧪', 'Practice & challenges'], ['skills', '🧠', 'Skill tree'], ['mock', '🎤', 'Mock interview']]],
-  ['Break', [['games', '🎮', 'Break room']]],
+  ['Study', [
+    ['dashboard', '📊', 'Dashboard'],
+    ['plan', '🗓', '15-Day Plan'],
+    ['qa', '💬', 'Interview Q&A'],
+    ['coding', '🧩', 'Coding Bank'],
+    ['revision', '🔁', 'Revision & Weak Spots'],
+    ['library', '📚', 'My Library'],
+    ['notes', '📝', 'Notes & Backup']
+  ]],
+  ['Practice', [
+    ['practice', '🧪', 'Practice Labs'],
+    ['skills', '🧠', 'Concept Tree'],
+    ['mock', '🎤', 'Mock Interview']
+  ]],
+  ['Break', [
+    ['games', '🎮', 'Break Room']
+  ]]
 ];
+
 const TITLE = Object.fromEntries(GROUPS.flatMap(g => g[1]).map(([k, , t]) => [k, t]));
 const PAD = {
-  js: "// Experiment freely. Press ⌘/Ctrl + Enter to run.\nconsole.log('hello');\n",
-  html: '<h1>Hello</h1>\n<script>console.log("hi")<\/script>\n',
+  js: "// Experiment freely. Press ⌘/Ctrl + Enter to run.\nconsole.log('hello from Forjix');\n",
+  html: '<h1>Hello from Forjix</h1>\n<script>console.log("hi")<\/script>\n',
   react: 'function App() {\n  const [n, setN] = useState(0);\n  return <button onClick={() => setN(n + 1)}>Clicked {n}</button>;\n}\n',
 };
-const NotFound = () => <div className="page"><h1>Page not found</h1><p className="mu">That address does not exist. <Link to="/dashboard" style={{ color: 'var(--ac)' }}>Go to the dashboard</Link></p></div>;
 
-export default function Shell({ onOut }) {
+const NotFound = () => (
+  <div className="page">
+    <h1>Page not found</h1>
+    <p className="mu">
+      That address does not exist.{' '}
+      <Link to="/dashboard" style={{ color: 'var(--ac)' }}>Go to the dashboard</Link>
+    </p>
+  </div>
+);
+
+export default function Shell({ onOut, onShowAuth }) {
   const { S, up, say, sv, toast, user } = useApp();
   const path = usePath(), r = parse(path);
-  const [open, setOpen] = useState(false), [theme, setTheme] = useState(document.documentElement.dataset.theme || 'dark');
+  const [open, setOpen] = useState(false);
+  const [theme, setTheme] = useState(document.documentElement.dataset.theme || 'dark');
   const exists = id => catalog.some(i => i.id === id) || S.pads.some(p => p.id === id);
   const inWork = r.view === 'practice' && r.a;
   const resume = findItem(S.cur, S.pads);
 
-  useEffect(() => { // warm up the code editor while the app is idle
+  useEffect(() => {
     if (getEditorPref() === 'simple') return undefined;
-    const go = () => loadCodeCM().catch(() => {}), idle = 'requestIdleCallback' in window;
-    const id = idle ? requestIdleCallback(go, { timeout: 4000 }) : setTimeout(go, 1500);
+    const goW = () => loadCodeCM().catch(() => {}), idle = 'requestIdleCallback' in window;
+    const id = idle ? requestIdleCallback(goW, { timeout: 4000 }) : setTimeout(goW, 1500);
     return () => (idle ? cancelIdleCallback(id) : clearTimeout(id));
   }, []);
-  useEffect(() => { if (!r.view) navigate(S.last && S.last !== '/' ? S.last : '/dashboard', true); }, [r.view]);
-  useEffect(() => { // remember where you are (for "resume") and scroll to the top on every page change
-    document.getElementById('main')?.scrollTo(0, 0); setOpen(false);
-    if (r.view && (S.last !== path || (inWork && exists(r.a) && S.cur !== r.a))) up(n => { n.last = path; if (inWork && exists(r.a)) n.cur = r.a; });
+
+  useEffect(() => {
+    if (!r.view) navigate(S.last && S.last !== '/' ? S.last : '/dashboard', true);
+  }, [r.view]);
+
+  useEffect(() => {
+    document.getElementById('main')?.scrollTo(0, 0);
+    setOpen(false);
+    if (r.view && (S.last !== path || (inWork && exists(r.a) && S.cur !== r.a))) {
+      up(n => {
+        n.last = path;
+        if (inWork && exists(r.a)) n.cur = r.a;
+      });
+    }
   }, [path]);
 
   const go = (v, id) => navigate(pathFor(v, id, S.cur));
-  const addPad = lang => { const id = 'pad' + Date.now(); up(n => { n.pads.push({ id, tr: 'Scratchpads', t: 'Scratchpad ' + (n.pads.length + 1), lang, code: PAD[lang] }); }); navigate('/practice/' + id); };
+
+  const addPad = lang => {
+    const id = 'pad' + Date.now();
+    up(n => {
+      n.pads.push({ id, tr: 'Scratchpads', t: 'Scratchpad ' + (n.pads.length + 1), lang, code: PAD[lang] });
+    });
+    navigate('/practice/' + id);
+  };
+
   const deletePad = p => {
     if (!window.confirm(`Delete "${p.t}"? Its code is removed and cannot be recovered.`)) return;
     up(n => removePad(n, p.id, lessons[0].id));
     if (inWork && r.a === p.id) navigate('/practice');
     say('Scratchpad deleted');
   };
+
   const toggleUnplugged = () => up(n => { n.unplugged = !n.unplugged; });
-  const logout = async () => { await backend.logout().catch(() => {}); onOut(); };
-  const toggleTheme = () => { const t = theme === 'dark' ? 'light' : 'dark'; setTheme(t); document.documentElement.dataset.theme = t; try { localStorage.setItem('forge.theme', t); } catch { /* private mode */ } };
+
+  const logout = async () => {
+    if (user === 'guest') {
+      if (window.confirm('Leave Guest mode and return to sign-in screen? Your local data is preserved in this browser.')) {
+        onOut();
+      }
+      return;
+    }
+    await backend.logout().catch(() => {});
+    onOut();
+  };
+
+  const toggleTheme = () => {
+    const t = theme === 'dark' ? 'light' : 'dark';
+    setTheme(t);
+    document.documentElement.dataset.theme = t;
+    try {
+      localStorage.setItem('forjix.theme', t);
+      localStorage.setItem('forge.theme', t);
+    } catch {
+      /* private mode */
+    }
+  };
 
   let V = null;
   switch (r.view) {
     case 'dashboard': V = <Dashboard go={go} />; break;
     case 'plan': V = <Plan day={r.a ? +r.a : null} tab={r.b} />; break;
-    case 'library': V = <Library go={go} />; break;
     case 'qa': V = <QA />; break;
-    case 'practice': V = !r.a ? <Practice go={go} /> : exists(r.a) ? <Workspace key={r.a} item={findItem(r.a, S.pads)} go={go} /> : <NotFound />; break;
+    case 'coding': V = <CodingBank go={go} />; break;
+    case 'revision': V = <Revision go={go} />; break;
+    case 'library': V = <Library go={go} />; break;
+    case 'practice':
+      V = !r.a
+        ? <Practice go={go} />
+        : exists(r.a)
+          ? <Workspace key={r.a} item={findItem(r.a, S.pads)} go={go} />
+          : <NotFound />;
+      break;
     case 'skills': V = <Skills />; break;
     case 'mock': V = <Mock go={go} />; break;
     case 'games': V = <Games />; break;
     case 'notes': V = <Notes />; break;
     default: V = r.view ? <NotFound /> : null;
   }
-  const crumb = r.view === 'plan' && r.a ? `15-day plan › Day ${r.a}` : inWork && exists(r.a) ? `Practice › ${findItem(r.a, S.pads).t}` : TITLE[r.view] || '';
+
+  const crumb = r.view === 'plan' && r.a
+    ? `15-Day Plan › Day ${r.a}`
+    : inWork && exists(r.a)
+      ? `Practice › ${findItem(r.a, S.pads).t}`
+      : TITLE[r.view] || '';
 
   return (
     <div id="app" className={open ? 'open' : ''}>
       <header>
         <button className="bt menu" onClick={() => setOpen(!open)} aria-label="Menu">☰</button>
-        <Link to="/dashboard" className="logo">Forge<b>_</b></Link>
+        <Link to="/dashboard" className="logo">Forjix<b>_</b></Link>
         <span id="crumb">{crumb}</span>
-        <span id="sv" className="hide-m">{sv}</span><span className="pg" title="Current streak">🔥 {stats(S.days).current}</span><span className="pg hide-m" title={user}>{user.split('@')[0]}</span>
-        <button className="bt" onClick={toggleTheme} title="Switch light / dark theme" aria-label="Switch theme">{theme === 'dark' ? '☀' : '🌙'}<span className="hide-m"> {theme === 'dark' ? 'Light' : 'Dark'}</span></button>
-        <button className={'bt hide-m' + (S.unplugged ? ' pri' : '')} title="Unplugged: no hints, no Zero, no solutions" onClick={toggleUnplugged}>🔌 {S.unplugged ? 'Unplugged' : 'Plugged in'}</button>
-        <button className="bt hide-m" onClick={logout}>Log out</button>
+        <span id="sv" className="hide-m">{sv}</span>
+        <span className="pg" title="Current streak">🔥 {stats(S.days).current}</span>
+
+        {user === 'guest' ? (
+          <button
+            className="bt pri hide-m"
+            style={{ fontSize: 12, padding: '4px 9px' }}
+            onClick={onShowAuth}
+            title="Link Firebase account to sync progress to cloud"
+          >
+            ☁ Link Firebase
+          </button>
+        ) : (
+          <span className="pg hide-m" title={user}>{user.split('@')[0]}</span>
+        )}
+
+        <button
+          className="bt"
+          onClick={toggleTheme}
+          title="Switch light / dark theme"
+          aria-label="Switch theme"
+        >
+          {theme === 'dark' ? '☀' : '🌙'}
+          <span className="hide-m"> {theme === 'dark' ? 'Light' : 'Dark'}</span>
+        </button>
+
+        <button
+          className={'bt hide-m' + (S.unplugged ? ' pri' : '')}
+          title="Unplugged: no hints, no Zero, no solutions"
+          onClick={toggleUnplugged}
+        >
+          🔌 {S.unplugged ? 'Unplugged' : 'Plugged in'}
+        </button>
+
+        <button className="bt hide-m" onClick={logout}>
+          {user === 'guest' ? 'Exit Guest' : 'Log out'}
+        </button>
       </header>
+
       <nav id="nav" aria-label="Main">
-        <Link to={'/practice/' + encodeURIComponent(S.cur)} className="resume"><span className="eb">▶ Resume</span><b>{resume.t}</b><small>Pick up where you left off</small></Link>
-        {GROUPS.map(([g, items]) => <div key={g}><h4>{g}</h4>
-          {items.map(([k, ic, t]) => <Link key={k} to={'/' + k} className={'it' + (r.view === k ? ' on' : '')} aria-current={r.view === k ? 'page' : undefined}>{ic} {t}</Link>)}</div>)}
-        <h4>Scratchpads<span><button onClick={() => addPad('js')}>+ JS</button><button onClick={() => addPad('html')}>+ HTML</button><button onClick={() => addPad('react')}>+ React</button></span></h4>
+        <Link to={'/practice/' + encodeURIComponent(S.cur)} className="resume">
+          <span className="eb">▶ Resume</span>
+          <b>{resume.t}</b>
+          <small>Pick up where you left off</small>
+        </Link>
+
+        {GROUPS.map(([g, items]) => (
+          <div key={g}>
+            <h4>{g}</h4>
+            {items.map(([k, ic, t]) => (
+              <Link
+                key={k}
+                to={'/' + k}
+                className={'it' + (r.view === k ? ' on' : '')}
+                aria-current={r.view === k ? 'page' : undefined}
+              >
+                {ic} {t}
+              </Link>
+            ))}
+          </div>
+        ))}
+
+        <h4>
+          Scratchpads
+          <span>
+            <button onClick={() => addPad('js')}>+ JS</button>
+            <button onClick={() => addPad('html')}>+ HTML</button>
+            <button onClick={() => addPad('react')}>+ React</button>
+          </span>
+        </h4>
+
         {S.pads.map(p => (
           <div key={p.id} className="padrow">
-            <Link to={'/practice/' + p.id} className={'it' + (inWork && r.a === p.id ? ' on' : '')}>{p.t}</Link>
-            <button className="padx" aria-label={'Delete ' + p.t} title="Delete scratchpad" onClick={() => deletePad(p)}>🗑</button>
-          </div>))}
-        <div className="acct"> {/* account controls live here on phones, where the header is too small for them */}
-          <h4>Account</h4><div className="acct-user">{user}</div>
-          <button className="bt" onClick={toggleTheme}>{theme === 'dark' ? '☀ Switch to light theme' : '🌙 Switch to dark theme'}</button>
-          <button className={'bt' + (S.unplugged ? ' pri' : '')} onClick={toggleUnplugged}>🔌 {S.unplugged ? 'Unplugged: hints and Zero off' : 'Plugged in'}</button>
-          <button className="bt" onClick={logout}>Log out</button>
-          <small className="mu">{sv}</small>
-        </div>
+            <Link
+              to={'/practice/' + p.id}
+              className={'it' + (r.view === 'practice' && r.a === p.id ? ' on' : '')}
+            >
+              📄 {p.t}
+            </Link>
+            <button
+              className="delpad"
+              onClick={() => deletePad(p)}
+              title="Delete scratchpad"
+              aria-label={'Delete ' + p.t}
+            >
+              ×
+            </button>
+          </div>
+        ))}
+
+        {user === 'guest' && (
+          <div style={{ margin: '18px 8px 10px', padding: 12, background: 'var(--p2)', borderRadius: 10, fontSize: 12 }}>
+            <b>Offline Guest Mode</b>
+            <p className="mu" style={{ margin: '4px 0 8px', fontSize: 11 }}>
+              Progress is stored in this browser. Link Firebase to access from any computer.
+            </p>
+            <button
+              className="bt pri"
+              style={{ width: '100%', fontSize: 11, padding: '4px 8px' }}
+              onClick={onShowAuth}
+            >
+              ☁ Link Firebase Account
+            </button>
+          </div>
+        )}
       </nav>
-      {open && <div className="backdrop" onClick={() => setOpen(false)} />}
+
       <main id="main">{V}</main>
-      {toast && <div id="toast" className="on" role="status">{toast}</div>}
+      <div id="toast" className={toast ? 'on' : ''}>{toast}</div>
     </div>
   );
 }

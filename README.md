@@ -1,74 +1,78 @@
-# Forge — a local-first skills platform: learn, practise, get interviewed, track progress (React + Node)
+# Forjix — 15-Day React & JavaScript Technical Interview Preparation Platform
 
-One web app for everything: the 15-day interview plan, Q&A with confidence tracking, coding-round problems,
-runnable lessons and challenges with tests, scratchpads, notes — with accounts and server-saved progress.
+**Forjix** is an intensive, practical 15-day interview preparation platform specifically engineered for React and Frontend Developers with ~3–4 years of experience (including those transitioning from Angular to React).
 
-## Where your data is stored
-Default: the Forge server (`server/data.json`). Or **Firebase** (free plan) so you can sign in from any computer: see `FIREBASE.md`.
+It provides an end-to-end learning, coding, and mock interview workflow:
+- **15-Day Targeted Syllabus**: Structured daily progression with learning objectives, core concepts, practical checklists, aligned interview questions, coding exercises, time allocations, completion criteria, and active recall quizzes.
+- **Spoken Interview Question Bank**: Conversational, technically precise model answers designed for speaking out loud, interviewer evaluation rubrics, common follow-up questions, and traps/misconceptions to avoid.
+- **Structured Coding Problem Bank**: Categorized by problem-solving patterns (Two Pointers, Sliding Window, Frequency Counters, Stacks, Closures, Async JS, React Components, Machine Coding) with progressive 3-step hint ladder, edge-case checklists, and reference solutions.
+- **Interactive Code Runner & Test Suites**: In-browser sandboxed iframe execution with console output, real automated test assertions, and live React previews.
+- **Revision & Weak Spots Center**: Active spaced-repetition quizzes, triage for flagged "Needs practice" questions, and incomplete task auditing.
+- **Timed Mock Interview Simulator**: Full 4-stage interview loop (Experience/STAR, JS Coding, React Q&A, and Machine Coding).
+- **Dual Persistence Architecture**: Zero-friction offline Guest mode with `localStorage` persistence + seamless Firebase cloud synchronization across all devices.
 
-## Run it
+---
+
+## Getting Started
+
+### 1. Run in Development Mode
 ```bash
-npm install          # run again after updating: the notes editor adds CodeMirror packages
-npm run dev        # API on :3000, React dev server on http://localhost:5173
+npm install
+npm run dev
 ```
-Production:
+- Starts Vite on `http://localhost:5173`.
+- You can immediately use the platform in **Guest (Offline) Mode** without any setup.
+
+### 2. Run Test Suite
 ```bash
-npm run build      # outputs dist/
-npm start          # serves dist/ + the API on http://localhost:3000
+npm test
 ```
-Env vars: `PORT` (default 3000), `DATA_FILE` (default `server/data.json`). Back that file up; it holds all accounts and progress.
+- Runs automated tests covering 15-day plan integrity, coding problem algorithms, question bank schema, and utility functions using Node's native test runner (`node --test`).
 
-## What is inside
-| Area | What you get |
-|---|---|
-| Dashboard | daily goal, GitHub-style activity calendar, current/longest streak, up-next suggestions, milestones, per-area progress |
-| 15-day plan | 15 days with task checklists, Q&A prompts, coding prompts, bonus topics, per-day notes |
-| Interview Q&A | 51 questions; mark "I can explain this" / "Needs practice"; search; Quiz me |
-| Practice | 5 lessons, 9 challenges with tests, 74 interview coding problems with hints |
-| Workspace | editor, sandboxed runner, console, tests, hints, live HTML and React previews |
-| Notes & backup | intro/project/bug/why stories, export, import of your old single-file plan's progress |
-
-## Zero, your local coach (optional)
-Zero asks guiding questions instead of giving answers, and runs on **your** machine. Nothing is sent to a cloud.
+### 3. Production Build
 ```bash
-# install Ollama from https://ollama.com, then:
-ollama pull llama3.2
-ollama serve            # keep it running (it usually starts automatically)
+npm run build
 ```
-Reload Forge; the Zero panel in any exercise shows "local model: …". Optional env vars: `OLLAMA_URL` (default `http://127.0.0.1:11434`), `OLLAMA_MODEL` (default: first installed model).
-Without Ollama everything else still works; use the 💡 hint ladder.
+- Bundles optimized assets into the `dist/` directory.
 
-## Running Zero on a modest machine
-The web app itself is light. Only Ollama uses real memory, and only while a model is loaded. Tips:
-- Pick a small model: `qwen2.5-coder:3b` (good for code checks), `llama3.2:3b` (good general explanations) or `qwen3:4b`. These need roughly 2 to 3 GB of RAM. 1B models run on almost anything but are too weak to rely on. Tags change, so check `ollama list` and ollama.com/library.
-- Zero asks Ollama to unload the model after 2 minutes idle. Change with `FORGE_KEEP_ALIVE` (for example `0` to unload immediately, `30m` to keep it warm). `ollama ps` shows what is loaded and `ollama stop <model>` unloads it now.
-- Context is capped at 4096 tokens (`OLLAMA_NUM_CTX` to change) and replies at about 450 tokens, which keeps memory and wait time down.
-- Several models installed? Choose one in the Zero panel.
-- No model at all is fine: everything else works, with the 💡 hint ladder.
+---
 
-## More features
-- **Code editors**: practice exercises, day snippets, scratchpads and mock coding rounds all use CodeMirror 6 (undo/redo, bracket matching, auto-closing brackets, language-aware indent). Switch to the lighter built-in editor any time in Notes & backup, Code editor.
-- **Notes editor**: CodeMirror 6 with live preview (the engine Obsidian uses). Notes stay plain markdown; headings, bold, lists and code blocks are formatted as you type, marks are hidden on lines you are not editing, and fenced code is highlighted per language (JS/TS/JSX, HTML, CSS, JSON, loaded on demand). It loads only when you edit a note. If it ever fails to load, Forge falls back to a simpler built-in editor automatically.
-- **Notes**: each day has proper markdown notes (several per day, edit/preview, checklists, code blocks you can copy or save as runnable snippets).
-- **Zero in a day or a challenge**: explains topics, checks your notes and code, and quizzes you, with your day, notes and snippets as context.
-- **Unplugged** (header switch): no hints, no Zero, no solutions. Just you and the problem.
-- **Mock interview**: timed Q&A rounds (self-rated, misses go to Needs practice) and unplugged coding rounds scored by tests. Zero can ask follow-ups.
-- **Skill tree**: DSA, web fundamentals and system design, each topic with an interactive lab and a quiz. Add topics in `src/data/domains.js`.
-- **Break room**: Snake and Big-O Blitz.
+## Firebase Cloud Sync (Optional)
 
-## Project layout
-```
-server/index.cjs        zero-dependency API: signup/login (scrypt + HttpOnly cookie), GET/PUT state
-src/store.jsx           one persisted state document per user (auto-saved, resumes on any device)
-src/data/plan.js        days, questions, interview problems (edit to add content)
-src/data/lessons.js     lessons + challenges with tests (edit to add content)
-src/components/         Shell, Dashboard, Plan, QA, Practice, Workspace, Editor, Viz, Notes, Auth
-```
-Add a challenge in `src/data/lessons.js` with `C(id, difficulty, title, description, starterCode, tests, hints, solution)`.
-Tests use `test(name, fn)`, `eq(actual, expected)`, `delay(ms)`.
+With Firebase enabled, all your progress (completed tasks, solved coding problems, flagged questions, notes, and streak) syncs to your personal Firebase project.
 
-## Notes
-- User code runs in a sandboxed iframe (`allow-scripts` only), so it cannot read your session or data.
-- React previews load React and Babel from unpkg, so they need an internet connection.
-- Interview problems have no automated tests; they open in the editor for self-review.
-- For many users, replace the JSON file store in `server/index.cjs` with a database.
+1. Ensure `.env.local` contains your Firebase project keys:
+   ```env
+   VITE_FIREBASE_API_KEY="your-api-key"
+   VITE_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
+   VITE_FIREBASE_PROJECT_ID="your-project"
+   VITE_FIREBASE_APP_ID="your-app-id"
+   ```
+2. Enable **Email/Password** under Firebase Console → Authentication → Sign-in method.
+3. Enable **Cloud Firestore** in Production mode with rules from `firestore.rules`.
+4. Deploy to Firebase Hosting:
+   ```bash
+   npx firebase-tools deploy --only hosting,firestore:rules
+   ```
+
+---
+
+## 15-Day Preparation Roadmap
+
+| Day | Focus Theme | Priority | Core Deliverable |
+|---|---|---|---|
+| **Day 1** | Scope, closures, hoisting & execution contexts | P1 Essential | Closure-based state manager without memory leaks |
+| **Day 2** | Arrays, objects & functional methods | P1 Essential | Immutable transforms, shallow vs deep cloning |
+| **Day 3** | Strings & core problem-solving patterns | P1 Essential | Two Sum, Anagrams, Longest Unique Substring |
+| **Day 4** | Promises & asynchronous JavaScript | P1 Essential | Event loop output, Promise.all & retry polyfills |
+| **Day 5** | Functions, `this`, debounce, throttle & events | P1 Essential | Debounce, throttle & bind polyfills, event delegation |
+| **Day 6** | React fundamentals & component mental model | P1 Essential | Todo app, stable keys, Angular vs React data flow |
+| **Day 7** | Rendering, reconciliation & state management | P1 Essential | Re-render causes, reconciliation, batching, snapshots |
+| **Day 8** | React Hooks, effects, refs & custom Hooks | P1 Essential | useEffect sync model, cleanups, stale closure fixes |
+| **Day 9** | State architecture, forms & routing | P2 Important | useReducer vs Context, multi-field form validation |
+| **Day 10** | API integration, autocomplete & race conditions | P1 Essential | Debounced autocomplete with AbortController |
+| **Day 11** | Performance, testing & maintainability | P2 Important | React.memo trade-offs, code splitting, RTL tests |
+| **Day 12** | React live coding & machine-coding practice | P1 Essential | Timed Tabs, Accordion, and Sortable Data Table |
+| **Day 13** | Project deep dive & frontend design | P1 Essential | Authentic STAR stories, Angular->React journey |
+| **Day 14** | Full mock interview simulation | P1 Essential | Complete 4-round simulation with timer & rubrics |
+| **Day 15** | Final revision, rapid recall & interview readiness | P1 Essential | Weak-spot triage, rapid-fire recall flashcards |

@@ -1,11 +1,12 @@
 {
-  "name": "forge",
+  "name": "forjix",
   "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "concurrently -n api,web \"node server/index.cjs\" \"vite\"",
     "build": "vite build",
+    "test": "node --test test/**/*.test.js",
     "start": "node server/index.cjs"
   },
   "dependencies": {

@@ -1,157 +1,671 @@
-// Lessons and challenges. Add new ones here.
-export const TR=[{n:'JavaScript',items:[
-{id:'closures',tr:'JavaScript',sub:'Scope',t:'Closures',v:'cl',lang:'js',
-body:`<p>A <b>closure</b> is a function that remembers the scope it was created in, even after that scope has finished. Each call to the outer function creates a <i>new</i> private scope.</p><p>Click below: the two counters share code but not state.</p>`,
-task:`Write <code>makeCounter2(start)</code> returning <code>{inc, dec, value}</code> that share one private count.`,
-code:`// A closure keeps access to the scope where it was created.
-function makeCounter() {
-  let count = 0;
-  return () => ++count;
-}
-const a = makeCounter(), b = makeCounter();
-console.log(a(), a(), b()); // 1 2 1
+// Forjix — Interactive Lessons & Challenges
+// Runnable in the sandboxed iframe with automated test runner and progressive hints
 
-// TASK: shared private state
-function makeCounter2(start = 0) {
+export const TR = [
+  {
+    n: 'JavaScript Core',
+    items: [
+      {
+        id: 'closures',
+        tr: 'JavaScript Core',
+        sub: 'Scope & Closures',
+        t: 'Closures & Private State',
+        v: 'cl',
+        lang: 'js',
+        body: `<p>A <b>closure</b> is a function that retains access to its lexical scope even after that outer scope has returned. Each invocation of the outer function creates an independent lexical environment in memory.</p><p>Closures are the foundational mechanism behind data encapsulation, factory functions, currying, and React's own <code>useState</code> hook.</p>`,
+        task: `Implement <code>makeCounter(initial = 0)</code> returning an object with methods: <code>increment()</code>, <code>decrement()</code>, <code>reset()</code>, and <code>value()</code>. <code>count</code> must remain private and cannot be directly modified.`,
+        code: `// A closure retains access to the outer lexical environment.
+function makeCounter(initial = 0) {
+  let count = initial;
+  // TASK: Return { increment, decrement, reset, value }
   
 }
-`,tests:`test('inc and dec change the value',()=>{const c=makeCounter2(5);c.inc();c.inc();c.dec();eq(c.value(),6)});
-test('each counter is independent',()=>{const x=makeCounter2(),y=makeCounter2();x.inc();eq(y.value(),0)});
-test('count is private',()=>{eq(makeCounter2().count,undefined)});`,
-h:['Declare a variable inside makeCounter2. Which functions can see it?','Return an object whose methods (inc, dec, value) all read and write that same variable.','let count = start; return { inc: () => ++count, ... } — value should return count.'],
-sol:`function makeCounter2(start = 0) {\n  let count = start;\n  return { inc: () => ++count, dec: () => --count, value: () => count };\n}`},
-{id:'loop',tr:'JavaScript',sub:'Async',t:'The event loop',v:'el',lang:'js',
-body:`<p>JavaScript runs one thing at a time. After the synchronous script ends, the engine drains <b>microtasks</b> (promise callbacks) before taking the next <b>task</b> (timers). Step through this program:</p><pre class="mono" style="font-size:12.5px">log('A'); setTimeout(()=>log('B'),0);\nPromise.resolve().then(()=>log('C')); log('D');</pre>`,
-task:`Make the output order <code>start, end, micro, timeout</code> by scheduling a microtask that logs <code>micro</code>.`,
-code:`console.log('start');
+
+const c = makeCounter(5);
+console.log(c.value()); // 5
+`,
+        tests: `test('increments and decrements properly', () => {
+  const c = makeCounter(10);
+  eq(c.increment(), 11);
+  eq(c.increment(), 12);
+  eq(c.decrement(), 11);
+  eq(c.value(), 11);
+});
+test('resets to initial value', () => {
+  const c = makeCounter(5);
+  c.increment(); c.increment();
+  eq(c.reset(), 5);
+  eq(c.value(), 5);
+});
+test('separate instances do not share state', () => {
+  const a = makeCounter(0), b = makeCounter(100);
+  a.increment();
+  eq(a.value(), 1);
+  eq(b.value(), 100);
+});
+test('count variable is private and encapsulated', () => {
+  const c = makeCounter(0);
+  eq(c.count, undefined);
+});`,
+        h: [
+          'Declare `let count = initial;` inside `makeCounter`.',
+          'Return an object with methods that all read and update that same lexical `count` variable.',
+          'Reset should assign `count = initial; return count;`.'
+        ],
+        sol: `function makeCounter(initial = 0) {
+  let count = initial;
+  return {
+    increment: () => ++count,
+    decrement: () => --count,
+    reset: () => (count = initial),
+    value: () => count
+  };
+}`
+      },
+      {
+        id: 'loop',
+        tr: 'JavaScript Core',
+        sub: 'Async Execution',
+        t: 'Event Loop & Microtasks',
+        v: 'el',
+        lang: 'js',
+        body: `<p>JavaScript is single-threaded. When synchronous code finishes, the engine drains all <b>microtasks</b> (Promise reactions, <code>queueMicrotask</code>) before picking the next <b>macrotask</b> (<code>setTimeout</code>, I/O).</p><p>Understanding this queue prioritization is essential for predicting asynchronous execution order in technical interviews.</p>`,
+        task: `Schedule a microtask that logs <code>'micro'</code> so that the final console output sequence is strictly: <code>'start', 'end', 'micro', 'timeout'</code>.`,
+        code: `console.log('start');
+
 setTimeout(() => console.log('timeout'), 0);
-// TASK: schedule a microtask that logs 'micro'
+
+// TASK: schedule a microtask logging 'micro'
 
 console.log('end');
-`,tests:`test('order is start, end, micro, timeout',async()=>{await delay(60);eq(L,['start','end','micro','timeout'])});`,
-h:['Which API puts a callback in the microtask queue, ahead of timers?','Promise.resolve().then(...) or queueMicrotask(...)','queueMicrotask(() => console.log("micro"))'],
-sol:`queueMicrotask(() => console.log('micro'));`},
-{id:'arrays',tr:'JavaScript',sub:'Data',t:'Array pipelines',v:'pp',lang:'js',
-body:`<p><code>map</code>, <code>filter</code> and <code>reduce</code> never mutate the original array; each returns something new, so they chain into pipelines. Build one below.</p>`,
-task:`Implement <code>groupBy(items, keyFn)</code> returning <code>{key: [items]}</code>, using <code>reduce</code>.`,
-code:`const people = [{n:'Ada',t:'eng'},{n:'Lin',t:'ops'},{n:'Bo',t:'eng'}];
+`,
+        tests: `test('order is start, end, micro, timeout', async () => {
+  await delay(60);
+  eq(L, ['start', 'end', 'micro', 'timeout']);
+});`,
+        h: [
+          'Which built-in API places a callback directly into the microtask queue ahead of timers?',
+          'You can use either `queueMicrotask(() => ...)` or `Promise.resolve().then(...)`.',
+          'queueMicrotask(() => console.log("micro"));'
+        ],
+        sol: `queueMicrotask(() => console.log('micro'));`
+      },
+      {
+        id: 'arrays',
+        tr: 'JavaScript Core',
+        sub: 'Data Transformation',
+        t: 'Array Pipelines (reduce)',
+        v: 'pp',
+        lang: 'js',
+        body: `<p><code>reduce</code> is the Swiss Army knife of array transformations. It can accumulate an array into numbers, strings, sets, or grouped objects without mutating the original input.</p>`,
+        task: `Implement <code>groupBy(items, keyFn)</code> returning an object <code>{ [key]: [items] }</code> using <code>reduce</code>. Do not mutate the input array.`,
+        code: `const people = [
+  { name: 'Alex', role: 'eng' },
+  { name: 'Sam', role: 'design' },
+  { name: 'Robin', role: 'eng' }
+];
 
 // TASK: groupBy(items, keyFn) -> { key: [items] }
 function groupBy(items, keyFn) {
   
 }
-console.log(groupBy(people, p => p.t));
-`,tests:`test('groups by key',()=>eq(groupBy([1,2,3,4],x=>x%2?'odd':'even'),{odd:[1,3],even:[2,4]}));
-test('empty input gives {}',()=>eq(groupBy([],x=>x),{}));
-test('does not mutate input',()=>{const a=[1,2];groupBy(a,x=>x);eq(a,[1,2])});`,
-h:['reduce needs a starting accumulator. What shape should it have?','For each item compute key = keyFn(item); create acc[key] if missing.','items.reduce((acc, x) => { (acc[keyFn(x)] ||= []).push(x); return acc; }, {})'],
-sol:`function groupBy(items, keyFn) {\n  return items.reduce((acc, x) => {\n    (acc[keyFn(x)] ||= []).push(x);\n    return acc;\n  }, {});\n}`},
-{id:'retry',tr:'JavaScript',sub:'Async',t:'Promises & retry',lang:'js',
-body:`<p>A promise is a value that arrives later. <code>async/await</code> lets you write the waiting as straight-line code, and <code>try/catch</code> handles rejections. Real apps retry flaky calls, so build that.</p>`,
-task:`Implement <code>retry(fn, times)</code>: call async <code>fn</code> up to <code>times</code> tries; resolve with its value or reject with the last error.`,
-code:`const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// TASK: retry an async function
+console.log(groupBy(people, p => p.role));
+`,
+        tests: `test('groups numbers into odd and even', () => {
+  const res = groupBy([1, 2, 3, 4], x => x % 2 === 0 ? 'even' : 'odd');
+  eq(res, { odd: [1, 3], even: [2, 4] });
+});
+test('empty array returns empty object', () => {
+  eq(groupBy([], x => x), {});
+});
+test('does not mutate input array', () => {
+  const orig = [1, 2, 3];
+  groupBy(orig, x => x);
+  eq(orig, [1, 2, 3]);
+});`,
+        h: [
+          'Initialize reduce with an empty object `{}` as the accumulator.',
+          'For each item, call `const key = keyFn(item)`.',
+          'Ensure `acc[key]` is an array before pushing `item` into it: `(acc[key] = acc[key] || []).push(item); return acc;`'
+        ],
+        sol: `function groupBy(items, keyFn) {
+  return items.reduce((acc, item) => {
+    const key = keyFn(item);
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(item);
+    return acc;
+  }, {});
+}`
+      },
+      {
+        id: 'retry',
+        tr: 'JavaScript Core',
+        sub: 'Async Resiliency',
+        t: 'Promises & Retry Logic',
+        lang: 'js',
+        body: `<p>Real-world network requests often experience transient failures. Implementing resilient retry logic with maximum attempts is a common senior frontend interview question.</p>`,
+        task: `Implement <code>retry(fn, times)</code>: call async function <code>fn</code> up to <code>times</code> attempts. Resolve with its value on success; reject with the last error if all attempts fail.`,
+        code: `const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// TASK: retry an async function up to 'times' attempts
 async function retry(fn, times) {
   
 }
-let n = 0;
-retry(async () => { if (++n < 3) throw new Error('flaky'); return 'ok'; }, 3).then(console.log);
-`,tests:`test('succeeds after failures',async()=>{let n=0;eq(await retry(async()=>{if(++n<3)throw new Error('x');return 'ok'},3),'ok');eq(n,3)});
-test('rejects with the last error',async()=>{let n=0,m='';try{await retry(async()=>{throw new Error('e'+ ++n)},3)}catch(e){m=e.message}eq(m,'e3')});`,
-h:['You need a loop that runs at most `times` iterations.','Inside the loop: try { return await fn() } catch (e) { remember e }.','After the loop, throw the remembered error.'],
-sol:`async function retry(fn, times) {\n  let last;\n  for (let i = 0; i < times; i++) {\n    try { return await fn(); } catch (e) { last = e; }\n  }\n  throw last;\n}`}]},
-{n:'Web',items:[{id:'dom',tr:'Web',sub:'HTML · CSS · JS',t:'Live page playground',lang:'html',
-body:`<p>Here HTML, CSS and JavaScript live in one file and render in the Preview tab. <code>console.log</code> inside the page still shows up in Console.</p>`,
-task:`Change the colour, then make the button count <i>down</i> from 10 and disable itself at 0. Mark complete when it works.`,
-code:`<style>
-  body{font-family:system-ui;display:grid;place-items:center;height:100vh;margin:0}
-  button{padding:12px 20px;border:0;border-radius:10px;background:#d9480f;color:#fff;font-size:16px}
-</style>
-<button id="b">Clicked 0 times</button>
-<script>
-  let n = 0;
-  b.onclick = () => { b.textContent = 'Clicked ' + ++n + ' times'; console.log('click', n); };
-<\/script>
-`,h:['Start with let n = 10 and decrement inside onclick.','Use b.disabled = true when n reaches 0.','if (--n === 0) b.disabled = true; then update b.textContent.'],
-sol:`let n = 10; b.textContent = n;\nb.onclick = () => { b.textContent = --n; if (n === 0) b.disabled = true; };`}]}];
-const C=(id,sub,t,body,code,tests,h,sol)=>({id,tr:'Challenges',sub,t,body:'<p>'+body+'</p>',task:'Make every test pass, then explain the time and space complexity out loud.',lang:'js',code,tests,h,sol});
-export const CHALL=[
-C('two-sum','Easy','Two Sum','Return the indices <code>[i, j]</code> (i &lt; j) of the two numbers that add up to <code>target</code>, or <code>[]</code> if none.',`// TASK
-function twoSum(nums, target) {
-  
-}
-`,`test('basic',()=>eq(twoSum([2,7,11,15],9),[0,1]));
-test('pair not at the start',()=>eq(twoSum([3,2,4],6),[1,2]));
-test('duplicates',()=>eq(twoSum([3,3],6),[0,1]));
-test('no answer gives []',()=>eq(twoSum([1,2],10),[]));`,['Brute force is O(n²). What do you need to remember to avoid rescanning?','Store value → index in a Map; look up target − current.'],`function twoSum(nums, target) {\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    if (seen.has(target - nums[i])) return [seen.get(target - nums[i]), i];\n    seen.set(nums[i], i);\n  }\n  return [];\n}`),
-C('balanced','Easy','Balanced brackets','Return true if every <code>()[]{}</code> bracket in the string is closed in the correct order.',`// TASK
-function isBalanced(s) {
-  
-}
-`,`test('simple pairs',()=>eq(isBalanced('()[]{}'),true));
-test('nested',()=>eq(isBalanced('{[()]}'),true));
-test('wrong closer',()=>eq(isBalanced('(]'),false));
-test('interleaved',()=>eq(isBalanced('([)]'),false));
-test('unclosed',()=>eq(isBalanced('(('),false));
-test('empty is balanced',()=>eq(isBalanced(''),true));`,['Which data structure gives you "most recent opener first"?','Push openers; on a closer, pop and compare. Stack must be empty at the end.'],`function isBalanced(s) {\n  const pair = { ')': '(', ']': '[', '}': '{' }, st = [];\n  for (const c of s) {\n    if ('([{'.includes(c)) st.push(c);\n    else if (st.pop() !== pair[c]) return false;\n  }\n  return st.length === 0;\n}`),
-C('anagram','Easy','Valid anagram','Return true if the two strings contain the same letters, ignoring case.',`// TASK
-function isAnagram(a, b) {
-  
-}
-`,`test('anagram',()=>eq(isAnagram('listen','silent'),true));
-test('ignores case',()=>eq(isAnagram('Listen','Silent'),true));
-test('different letters',()=>eq(isAnagram('rat','car'),false));
-test('different length',()=>eq(isAnagram('a','ab'),false));`,['Two strings are anagrams if their sorted letters match.','Normalise case, split into characters, sort, join, compare.'],`function isAnagram(a, b) {\n  const f = s => [...s.toLowerCase()].sort().join('');\n  return f(a) === f(b);\n}`),
-C('substring','Medium','Longest unique substring','Return the length of the longest substring without repeating characters.',`// TASK
-function lengthOfLongestSubstring(s) {
-  
-}
-`,`test('abcabcbb',()=>eq(lengthOfLongestSubstring('abcabcbb'),3));
-test('bbbbb',()=>eq(lengthOfLongestSubstring('bbbbb'),1));
-test('pwwkew',()=>eq(lengthOfLongestSubstring('pwwkew'),3));
-test('dvdf',()=>eq(lengthOfLongestSubstring('dvdf'),3));
-test('empty',()=>eq(lengthOfLongestSubstring(''),0));`,['Use a sliding window with a left and right pointer.','Keep a Map of last-seen index; when you see a repeat, move left past it (never backwards).'],`function lengthOfLongestSubstring(s) {\n  const last = new Map();\n  let left = 0, best = 0;\n  for (let r = 0; r < s.length; r++) {\n    if (last.has(s[r]) && last.get(s[r]) >= left) left = last.get(s[r]) + 1;\n    last.set(s[r], r);\n    best = Math.max(best, r - left + 1);\n  }\n  return best;\n}`),
-C('debounce','Medium','Debounce','Return a wrapper that waits <code>ms</code> after the <i>last</i> call, then calls <code>fn</code> once with the latest arguments.',`// TASK
-function debounce(fn, ms) {
-  
-}
-`,`test('waits then calls once with last args',async()=>{const c=[];const d=debounce(x=>c.push(x),30);d(1);d(2);d(3);eq(c,[]);await delay(90);eq(c,[3])});
-test('later bursts run again',async()=>{const c=[];const d=debounce(x=>c.push(x),20);d('a');await delay(60);d('b');await delay(60);eq(c,['a','b'])});`,['The wrapper needs to remember the pending timer between calls.','clearTimeout(timer) then timer = setTimeout(() => fn(...args), ms).'],`function debounce(fn, ms) {\n  let t;\n  return (...args) => {\n    clearTimeout(t);\n    t = setTimeout(() => fn(...args), ms);\n  };\n}`),
-C('flatten','Medium','Flatten array','Flatten nested arrays up to <code>depth</code> levels (default: all). Do not mutate the input.',`// TASK
-function flatten(arr, depth = Infinity) {
-  
-}
-`,`test('fully flattens',()=>eq(flatten([1,[2,[3,[4]]]]),[1,2,3,4]));
-test('respects depth',()=>eq(flatten([1,[2,[3,[4]]]],1),[1,2,[3,[4]]]));
-test('empty',()=>eq(flatten([]),[]));`,['Recursion fits nested data. What is your base case?','reduce: if the item is an array and depth > 0, concat flatten(item, depth - 1); else keep the item.'],`function flatten(arr, depth = Infinity) {\n  return arr.reduce((out, x) =>\n    Array.isArray(x) && depth > 0 ? out.concat(flatten(x, depth - 1)) : out.concat([x]), []);\n}`),
-C('memoize','Medium','Memoize','Cache results of <code>fn</code> by its arguments so repeated calls do not recompute (including falsy results).',`// TASK
-function memoize(fn) {
-  
-}
-`,`test('caches by arguments',()=>{let n=0;const f=memoize((a,b)=>(n++,a+b));eq(f(1,2),3);eq(f(1,2),3);eq(n,1)});
-test('different args compute again',()=>{let n=0;const f=memoize(x=>(n++,x*2));f(1);f(2);eq(n,2)});
-test('caches falsy results',()=>{let n=0;const f=memoize(()=>(n++,0));f();f();eq(n,1)});`,['You need a cache keyed by the arguments.','Use JSON.stringify(args) as the key and check cache.has(key), not truthiness.'],`function memoize(fn) {\n  const cache = new Map();\n  return (...args) => {\n    const k = JSON.stringify(args);\n    if (!cache.has(k)) cache.set(k, fn(...args));\n    return cache.get(k);\n  };\n}`),
-C('lru','Hard','LRU cache','Implement <code>get(key)</code> (returns -1 if missing) and <code>put(key, value)</code> in O(1), evicting the least recently used entry when over capacity.',`// TASK
-class LRUCache {
-  constructor(capacity) {
-    
-  }
-  get(key) {
-    
-  }
-  put(key, value) {
-    
-  }
-}
-`,`test('evicts least recently used',()=>{const c=new LRUCache(2);c.put(1,1);c.put(2,2);eq(c.get(1),1);c.put(3,3);eq(c.get(2),-1);c.put(4,4);eq(c.get(1),-1);eq(c.get(3),3);eq(c.get(4),4)});
-test('put refreshes an existing key',()=>{const c=new LRUCache(2);c.put(1,1);c.put(2,2);c.put(1,9);c.put(3,3);eq(c.get(1),9);eq(c.get(2),-1)});`,['A Map remembers insertion order. How can you make "recently used" mean "last in the Map"?','On get/put: delete the key then set it again. If size > capacity, delete map.keys().next().value.'],`class LRUCache {\n  constructor(capacity) { this.cap = capacity; this.m = new Map(); }\n  get(key) {\n    if (!this.m.has(key)) return -1;\n    const v = this.m.get(key);\n    this.m.delete(key); this.m.set(key, v);\n    return v;\n  }\n  put(key, value) {\n    this.m.delete(key); this.m.set(key, value);\n    if (this.m.size > this.cap) this.m.delete(this.m.keys().next().value);\n  }\n}`),
-C('promise-all','Hard','Promise.all','Write <code>promiseAll(items)</code>: resolve with results in input order, reject on the first rejection, and accept plain values.',`// TASK
-function promiseAll(items) {
-  
-}
-`,`test('keeps input order',async()=>eq(await promiseAll([delay(30).then(()=>'a'),Promise.resolve('b'),'c']),['a','b','c']));
-test('rejects on the first failure',async()=>{let m='';try{await promiseAll([delay(30),(p=>(p.catch(()=>{}),p))(Promise.reject(new Error('boom')))])}catch(e){m=e.message}eq(m,'boom')});
-test('empty array resolves []',async()=>eq(await promiseAll([]),[]));`,['Return a new Promise and count how many inputs are still pending.','Write each value into out[i] (not push) so order is kept; resolve when the counter hits 0; pass reject straight through.'],`function promiseAll(items) {\n  return new Promise((resolve, reject) => {\n    const out = [];\n    let left = items.length;\n    if (!left) return resolve(out);\n    items.forEach((p, i) => Promise.resolve(p).then(v => {\n      out[i] = v;\n      if (--left === 0) resolve(out);\n    }, reject));\n  });\n}`)];
 
-TR.push({n:'Challenges',items:CHALL});
+let count = 0;
+retry(async () => {
+  if (++count < 3) throw new Error('flaky');
+  return 'success';
+}, 3).then(console.log);
+`,
+        tests: `test('resolves after initial failures', async () => {
+  let n = 0;
+  const res = await retry(async () => {
+    if (++n < 3) throw new Error('fail');
+    return 'ok';
+  }, 3);
+  eq(res, 'ok');
+  eq(n, 3);
+});
+test('rejects with final error when all attempts fail', async () => {
+  let err = '';
+  try {
+    await retry(async () => { throw new Error('network down'); }, 3);
+  } catch (e) {
+    err = e.message;
+  }
+  eq(err, 'network down');
+});`,
+        h: [
+          'Loop from `0` to `times - 1`.',
+          'Inside the loop, `try { return await fn(); } catch (e) { lastErr = e; }`.',
+          'After the loop finishes without returning, throw `lastErr`.'
+        ],
+        sol: `async function retry(fn, times) {
+  let lastErr;
+  for (let i = 0; i < times; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}`
+      },
+      {
+        id: 'this-bind',
+        tr: 'JavaScript Core',
+        sub: 'Function Context',
+        t: 'Function.prototype.bind',
+        lang: 'js',
+        body: `<p><code>bind()</code> creates a new function that, when called, has its <code>this</code> keyword set to the provided context, with a given sequence of arguments prepended to any provided when the new function is called.</p>`,
+        task: `Implement <code>myBind(context, ...boundArgs)</code> on <code>Function.prototype</code>.`,
+        code: `// TASK: Implement Function.prototype.myBind
+Function.prototype.myBind = function(context, ...boundArgs) {
+  
+};
+
+function greet(greeting, punctuation) {
+  return greeting + ', ' + this.name + punctuation;
+}
+
+const user = { name: 'Alex' };
+const sayHello = greet.myBind(user, 'Hello');
+console.log(sayHello('!')); // "Hello, Alex!"
+`,
+        tests: `test('binds this context', () => {
+  function getX() { return this.x; }
+  const bound = getX.myBind({ x: 42 });
+  eq(bound(), 42);
+});
+test('preserves prepended bound arguments', () => {
+  function add(a, b, c) { return this.base + a + b + c; }
+  const bound = add.myBind({ base: 10 }, 1, 2);
+  eq(bound(3), 16);
+});`,
+        h: [
+          'Save the original function reference: `const target = this;`.',
+          'Return a new function taking `...callArgs`.',
+          'Call `target.apply(context, [...boundArgs, ...callArgs])` and return the result.'
+        ],
+        sol: `Function.prototype.myBind = function(context, ...boundArgs) {
+  const target = this;
+  if (typeof target !== 'function') throw new TypeError('Target is not callable');
+  return function(...callArgs) {
+    return target.apply(context, [...boundArgs, ...callArgs]);
+  };
+};`
+      }
+    ]
+  },
+  {
+    n: 'React & UI',
+    items: [
+      {
+        id: 'react-counter',
+        tr: 'React & UI',
+        sub: 'Component State',
+        t: 'Counter with Step and Reset',
+        lang: 'react',
+        body: `<p>Build an interactive React counter demonstrating controlled step inputs, functional state updates, and reset mechanisms.</p>`,
+        task: `Build <code>App</code> with: count display, + / - buttons, step number input, and a Reset button that resets count to 0 and step to 1.`,
+        code: `function App() {
+  const [count, setCount] = useState(0);
+  const [step, setStep] = useState(1);
+
+  return (
+    <div style={{ fontFamily: 'system-ui', padding: 24 }}>
+      <h2>Counter: {count}</h2>
+      <div style={{ display: 'flex', gap: 8, margin: '12px 0' }}>
+        <button onClick={() => setCount(c => c - step)}>- {step}</button>
+        <button onClick={() => setCount(c => c + step)}>+ {step}</button>
+        <button onClick={() => { setCount(0); setStep(1); }}>Reset</button>
+      </div>
+      <label>
+        Step: 
+        <input 
+          type="number" 
+          value={step} 
+          onChange={e => setStep(Number(e.target.value) || 1)} 
+          style={{ width: 60, marginLeft: 8 }} 
+        />
+      </label>
+    </div>
+  );
+}
+`,
+        h: [
+          'Use functional updates: `setCount(c => c + step)` to prevent state snapshot issues.',
+          'Convert input value to a number using `Number(e.target.value) || 1`.',
+          'Reset handler should update both `count` and `step`.'
+        ],
+        sol: `function App() {
+  const [count, setCount] = useState(0);
+  const [step, setStep] = useState(1);
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>{count}</h1>
+      <button onClick={() => setCount(c => c - step)}>-</button>
+      <button onClick={() => setCount(c => c + step)}>+</button>
+      <button onClick={() => { setCount(0); setStep(1); }}>Reset</button>
+      <input type="number" value={step} onChange={e => setStep(+e.target.value || 1)} />
+    </div>
+  );
+}`
+      },
+      {
+        id: 'react-debounce-hook',
+        tr: 'React & UI',
+        sub: 'Custom Hooks',
+        t: 'useDebounce Hook',
+        lang: 'react',
+        body: `<p>Search fields should not trigger API calls on every keystroke. A <code>useDebounce(value, delay)</code> hook delays propagating changes until user typing pauses.</p>`,
+        task: `Implement <code>useDebounce(value, delay)</code> with cleanup to prevent memory leaks.`,
+        code: `function useDebounce(value, delay = 300) {
+  const [debounced, setDebounced] = useState(value);
+
+  // TASK: useEffect setting timeout with clearTimeout cleanup
+  useEffect(() => {
+    
+  }, [value, delay]);
+
+  return debounced;
+}
+
+function App() {
+  const [text, setText] = useState('');
+  const debouncedText = useDebounce(text, 500);
+
+  return (
+    <div style={{ fontFamily: 'system-ui', padding: 24 }}>
+      <input 
+        value={text} 
+        onChange={e => setText(e.target.value)} 
+        placeholder="Type quickly..." 
+        style={{ padding: 8, width: 250 }} 
+      />
+      <p>Immediate: <b>{text}</b></p>
+      <p>Debounced (500ms): <b style={{ color: 'orange' }}>{debouncedText}</b></p>
+    </div>
+  );
+}
+`,
+        h: [
+          'Inside useEffect, set `const t = setTimeout(() => setDebounced(value), delay)`.',
+          'Return a cleanup function `() => clearTimeout(t)`.',
+          'Include `[value, delay]` in the dependency array.'
+        ],
+        sol: `function useDebounce(value, delay = 300) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debounced;
+}`
+      }
+    ]
+  }
+];
+
+const C = (id, sub, t, body, code, tests, h, sol) => ({
+  id,
+  tr: 'Challenges',
+  sub,
+  t,
+  body: '<p>' + body + '</p>',
+  task: 'Make every test pass, then explain your approach and time/space complexity out loud.',
+  lang: 'js',
+  code,
+  tests,
+  h,
+  sol
+});
+
+export const CHALL = [
+  C(
+    'two-sum',
+    'Easy',
+    'Two Sum',
+    'Return indices <code>[i, j]</code> (i &lt; j) of two numbers that sum to <code>target</code>, or <code>[]</code> if none.',
+    `function twoSum(nums, target) {
+  // TASK: O(n) hash map approach
+  
+}
+`,
+    `test('finds matching pair', () => eq(twoSum([2, 7, 11, 15], 9), [0, 1]));
+test('pair not at beginning', () => eq(twoSum([3, 2, 4], 6), [1, 2]));
+test('duplicate values', () => eq(twoSum([3, 3], 6), [0, 1]));
+test('returns [] when no solution', () => eq(twoSum([1, 2], 10), []));`,
+    [
+      'Brute force checks all pairs in O(n²). How can you look up the required complement in O(1)?',
+      'Use a Map where key is `num` and value is `index`.',
+      'At each index `i`, check if `map.has(target - nums[i])`. If yes, return `[map.get(target - nums[i]), i]`; else `map.set(nums[i], i)`.'
+    ],
+    `function twoSum(nums, target) {
+  const seen = new Map();
+  for (let i = 0; i < nums.length; i++) {
+    const diff = target - nums[i];
+    if (seen.has(diff)) return [seen.get(diff), i];
+    seen.set(nums[i], i);
+  }
+  return [];
+}`
+  ),
+
+  C(
+    'balanced',
+    'Easy',
+    'Balanced brackets',
+    'Return true if every <code>()[]{}</code> bracket is closed in the correct order.',
+    `function isBalanced(s) {
+  // TASK: Stack-based bracket validator
+  
+}
+`,
+    `test('simple pairs', () => eq(isBalanced('()[]{}'), true));
+test('nested brackets', () => eq(isBalanced('{[()]}'), true));
+test('wrong closer', () => eq(isBalanced('(]'), false));
+test('interleaved brackets', () => eq(isBalanced('([)]'), false));
+test('unclosed openers', () => eq(isBalanced('(('), false));
+test('empty string is balanced', () => eq(isBalanced(''), true));`,
+    [
+      'Which data structure provides Last-In-First-Out (LIFO) tracking?',
+      'Push opening brackets onto a stack. When a closer appears, pop and compare.',
+      'Check that the stack is completely empty at the end.'
+    ],
+    `function isBalanced(s) {
+  const pairs = { ')': '(', ']': '[', '}': '{' };
+  const stack = [];
+  for (const c of s) {
+    if ('([{'.includes(c)) {
+      stack.push(c);
+    } else if (pairs[c]) {
+      if (stack.pop() !== pairs[c]) return false;
+    }
+  }
+  return stack.length === 0;
+}`
+  ),
+
+  C(
+    'anagram',
+    'Easy',
+    'Valid anagram',
+    'Return true if string <code>b</code> is an anagram of string <code>a</code>, ignoring case.',
+    `function isAnagram(a, b) {
+  // TASK: Frequency counter approach
+  
+}
+`,
+    `test('valid anagram', () => eq(isAnagram('listen', 'silent'), true));
+test('ignores casing', () => eq(isAnagram('Listen', 'Silent'), true));
+test('different characters', () => eq(isAnagram('rat', 'car'), false));
+test('different lengths', () => eq(isAnagram('a', 'ab'), false));`,
+    [
+      'Two strings of different lengths cannot be anagrams.',
+      'Count letter frequencies in the first string, then decrement for the second string.',
+      'Verify that all character counts match zero.'
+    ],
+    `function isAnagram(a, b) {
+  const s1 = a.toLowerCase(), s2 = b.toLowerCase();
+  if (s1.length !== s2.length) return false;
+  const count = {};
+  for (const c of s1) count[c] = (count[c] || 0) + 1;
+  for (const c of s2) {
+    if (!count[c]) return false;
+    count[c]--;
+  }
+  return true;
+}`
+  ),
+
+  C(
+    'substring',
+    'Medium',
+    'Longest unique substring',
+    'Return the length of the longest substring without duplicate characters.',
+    `function lengthOfLongestSubstring(s) {
+  // TASK: Sliding window with Map of last seen indices
+  
+}
+`,
+    `test('abcabcbb gives 3', () => eq(lengthOfLongestSubstring('abcabcbb'), 3));
+test('bbbbb gives 1', () => eq(lengthOfLongestSubstring('bbbbb'), 1));
+test('pwwkew gives 3', () => eq(lengthOfLongestSubstring('pwwkew'), 3));
+test('dvdf gives 3', () => eq(lengthOfLongestSubstring('dvdf'), 3));
+test('empty string gives 0', () => eq(lengthOfLongestSubstring(''), 0));`,
+    [
+      'Maintain a sliding window with left and right pointers.',
+      'Track the last seen index of each character in a Map.',
+      'When a repeat is found at or after `left`, jump `left` to `lastIndex + 1`.'
+    ],
+    `function lengthOfLongestSubstring(s) {
+  const last = new Map();
+  let left = 0, best = 0;
+  for (let right = 0; right < s.length; right++) {
+    const char = s[right];
+    if (last.has(char) && last.get(char) >= left) {
+      left = last.get(char) + 1;
+    }
+    last.set(char, right);
+    best = Math.max(best, right - left + 1);
+  }
+  return best;
+}`
+  ),
+
+  C(
+    'debounce',
+    'Medium',
+    'Implement debounce',
+    'Return a function that waits <code>ms</code> after the last call before executing <code>fn</code> with the latest arguments.',
+    `function debounce(fn, ms) {
+  // TASK: Return debounced function
+  
+}
+`,
+    `test('waits and executes once with last args', async () => {
+  const c = [];
+  const d = debounce(x => c.push(x), 30);
+  d(1); d(2); d(3);
+  eq(c, []);
+  await delay(70);
+  eq(c, [3]);
+});
+test('subsequent bursts run again', async () => {
+  const c = [];
+  const d = debounce(x => c.push(x), 20);
+  d('a');
+  await delay(50);
+  d('b');
+  await delay(50);
+  eq(c, ['a', 'b']);
+});`,
+    [
+      'A closure stores the pending timer.',
+      'On every call, clearTimeout(timerId).',
+      'Set `timerId = setTimeout(() => fn.apply(this, args), ms)`.'
+    ],
+    `function debounce(fn, ms) {
+  let timerId;
+  return function(...args) {
+    clearTimeout(timerId);
+    timerId = setTimeout(() => fn.apply(this, args), ms);
+  };
+}`
+  ),
+
+  C(
+    'flatten',
+    'Medium',
+    'Flatten array with depth',
+    'Flatten nested arrays up to <code>depth</code> levels (default: all). Do not mutate input.',
+    `function flatten(arr, depth = Infinity) {
+  // TASK: Recursive flattening
+  
+}
+`,
+    `test('fully flattens nested array', () => eq(flatten([1, [2, [3, [4]]]]), [1, 2, 3, 4]));
+test('respects depth limit 1', () => eq(flatten([1, [2, [3, [4]]]], 1), [1, 2, [3, [4]]]));
+test('empty array returns []', () => eq(flatten([]), []));`,
+    [
+      'Use reduce or a loop to construct a new output array.',
+      'If an element is an array and `depth > 0`, recursively call `flatten(item, depth - 1)`.',
+      'Otherwise, push the item directly into the output.'
+    ],
+    `function flatten(arr, depth = Infinity) {
+  return arr.reduce((acc, item) => {
+    if (Array.isArray(item) && depth > 0) {
+      return acc.concat(flatten(item, depth - 1));
+    }
+    return acc.concat(item);
+  }, []);
+}`
+  ),
+
+  C(
+    'memoize',
+    'Medium',
+    'Memoize function',
+    'Cache results of <code>fn</code> by serialized arguments so repeated calls return cached values without recomputing.',
+    `function memoize(fn) {
+  // TASK: Cache results by arguments
+  
+}
+`,
+    `test('caches computation by arguments', () => {
+  let calls = 0;
+  const square = memoize(x => { calls++; return x * x; });
+  eq(square(4), 16);
+  eq(square(4), 16);
+  eq(calls, 1);
+});
+test('different arguments compute separately', () => {
+  let calls = 0;
+  const double = memoize(x => { calls++; return x * 2; });
+  double(1); double(2);
+  eq(calls, 2);
+});
+test('caches falsy results correctly', () => {
+  let calls = 0;
+  const zero = memoize(() => { calls++; return 0; });
+  zero(); zero();
+  eq(calls, 1);
+});`,
+    [
+      'Maintain a `cache = new Map()` in a closure.',
+      'Serialize arguments using `JSON.stringify(args)`.',
+      'Check `cache.has(key)` to properly handle falsy or undefined results.'
+    ],
+    `function memoize(fn) {
+  const cache = new Map();
+  return function(...args) {
+    const key = JSON.stringify(args);
+    if (!cache.has(key)) {
+      cache.set(key, fn.apply(this, args));
+    }
+    return cache.get(key);
+  };
+}`
+  ),
+
+  C(
+    'promise-all',
+    'Hard',
+    'Polyfill Promise.all',
+    'Write <code>promiseAll(items)</code>: resolve with results in input order, reject on first rejection, and handle empty arrays.',
+    `function promiseAll(items) {
+  // TASK: Implement Promise.all
+  
+}
+`,
+    `test('maintains input order', async () => {
+  const p1 = delay(30).then(() => 'first');
+  const p2 = Promise.resolve('second');
+  const p3 = 'third';
+  eq(await promiseAll([p1, p2, p3]), ['first', 'second', 'third']);
+});
+test('rejects immediately on first error', async () => {
+  let err = '';
+  try {
+    await promiseAll([
+      delay(50),
+      (p => { p.catch(() => {}); return p; })(Promise.reject(new Error('fail')))
+    ]);
+  } catch (e) {
+    err = e.message;
+  }
+  eq(err, 'fail');
+});
+test('empty array resolves to []', async () => {
+  eq(await promiseAll([]), []);
+});`,
+    [
+      'Return `new Promise((resolve, reject) => ...)`. Handle `items.length === 0` immediately.',
+      'Maintain `const results = []` and `let completed = 0`.',
+      'Wrap each item in `Promise.resolve(item)`. Store result at `results[i] = val` and resolve when `++completed === items.length`.'
+    ],
+    `function promiseAll(items) {
+  return new Promise((resolve, reject) => {
+    const arr = Array.from(items);
+    if (arr.length === 0) return resolve([]);
+    const results = new Array(arr.length);
+    let completed = 0;
+    arr.forEach((item, index) => {
+      Promise.resolve(item)
+        .then(val => {
+          results[index] = val;
+          completed++;
+          if (completed === arr.length) resolve(results);
+        })
+        .catch(reject);
+    });
+  });
+}`
+  )
+];
+
+TR.push({ n: 'Challenges', items: CHALL });
