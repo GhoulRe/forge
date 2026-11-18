@@ -64,6 +64,7 @@ export default function Shell({ onOut, onShowAuth }) {
   const path = usePath(), r = parse(path);
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState(document.documentElement.dataset.theme || 'dark');
+  const [accent, setAccent] = useState(document.documentElement.dataset.accent || 'mint');
   const exists = id => catalog.some(i => i.id === id) || S.pads.some(p => p.id === id);
   const inWork = r.view === 'practice' && r.a;
   const resume = findItem(S.cur, S.pads);
@@ -132,6 +133,17 @@ export default function Shell({ onOut, onShowAuth }) {
     }
   };
 
+  const toggleAccent = () => {
+    const a = accent === 'mint' ? 'orange' : 'mint';
+    setAccent(a);
+    if (a === 'mint') {
+      delete document.documentElement.dataset.accent;
+    } else {
+      document.documentElement.dataset.accent = a;
+    }
+    try { localStorage.setItem('forjix.accent', a); } catch { /* private mode */ }
+  };
+
   let V = null;
   switch (r.view) {
     case 'dashboard': V = <Dashboard go={go} />; break;
@@ -190,6 +202,17 @@ export default function Shell({ onOut, onShowAuth }) {
         >
           {theme === 'dark' ? '☀' : '🌙'}
           <span className="hide-m"> {theme === 'dark' ? 'Light' : 'Dark'}</span>
+        </button>
+
+        <button
+          className="bt"
+          onClick={toggleAccent}
+          title={accent === 'mint' ? 'Switch to Classic Orange accent' : 'Switch to Mint accent'}
+          aria-label="Switch accent color"
+          style={{ color: accent === 'mint' ? '#00dc82' : '#ff7849' }}
+        >
+          {accent === 'mint' ? '🟢' : '🟠'}
+          <span className="hide-m"> {accent === 'mint' ? 'Mint' : 'Orange'}</span>
         </button>
 
         <button

@@ -12,6 +12,8 @@
   <script>
     try {
       document.documentElement.dataset.theme = localStorage.getItem('forjix.theme') || localStorage.getItem('forge.theme') || 'dark';
+      var _a = localStorage.getItem('forjix.accent');
+      if (_a && _a !== 'mint') document.documentElement.dataset.accent = _a;
     } catch(e) {
       document.documentElement.dataset.theme = 'dark';
     }

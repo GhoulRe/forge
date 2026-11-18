@@ -45,6 +45,24 @@
   --c: #94a3b8;
 }
 
+/* ── Classic Orange Accent (dark) ── */
+:root[data-accent="orange"] {
+  --ac: #ff7849;
+  --ac-hover: #ff9166;
+  --ac-glow: rgba(255, 120, 73, 0.25);
+  --ok: #4ade80;
+  --k: #ff7849;
+}
+
+/* ── Classic Orange Accent (light) ── */
+:root[data-theme="light"][data-accent="orange"] {
+  --ac: #ea580c;
+  --ac-hover: #f97316;
+  --ac-glow: rgba(234, 88, 12, 0.15);
+  --ok: #16a34a;
+  --k: #ea580c;
+}
+
 html {
   scroll-padding-top: env(safe-area-inset-top, 0px);
   height: 100%;
