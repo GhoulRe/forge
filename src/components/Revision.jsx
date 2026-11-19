@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useApp } from '../store.jsx';
-import { questions } from '../data/questions.js';
+import { allQuestions as questions } from '../data/questions.js';
 import { days } from '../data/days.js';
-import { problems } from '../data/problems.js';
+import { practicalDays } from '../data/practical/plan.js';
+import { allProblems as problems } from '../data/problems.js';
 import { bump } from '../lib/util.js';
+import { navigate } from '../router.js';
 
 export default function Revision({ go }) {
   const { S, up, say } = useApp();
@@ -18,8 +20,12 @@ export default function Revision({ go }) {
     .filter(q => S.qs[q.originalIndex] === 'review');
 
   // Incomplete tasks from active days
-  const dayGaps = days.map(d => {
-    const incompleteTasks = d.tasks.filter((_, idx) => !S.tasks[d.n + '-' + idx]);
+  const progressDays = [
+    ...days.map(d => ({ ...d, key: d.n, track: 'advanced' })),
+    ...practicalDays.map(d => ({ ...d, key: 'practical-' + d.n, track: 'practical' }))
+  ];
+  const dayGaps = progressDays.map(d => {
+    const incompleteTasks = d.tasks.filter((_, idx) => !S.tasks[d.key + '-' + idx]);
     return {
       day: d,
       incompleteCount: incompleteTasks.length,
@@ -265,10 +271,10 @@ export default function Revision({ go }) {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {dayGaps.map(g => (
-                <div key={g.day.n} className="panel">
+                <div key={g.day.key} className="panel">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3>Day {g.day.n}: {g.day.title}</h3>
-                    <button className="bt pri" onClick={() => go('day', g.day.n)}>
+                    <h3>{g.day.track === 'practical' ? 'Practical' : 'Advanced'} · Day {g.day.n}: {g.day.title}</h3>
+                    <button className="bt pri" onClick={() => navigate('/plan/' + g.day.track + '/' + g.day.n)}>
                       Open Day {g.day.n} →
                     </button>
                   </div>

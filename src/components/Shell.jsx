@@ -68,6 +68,9 @@ export default function Shell({ onOut, onShowAuth }) {
   const exists = id => catalog.some(i => i.id === id) || S.pads.some(p => p.id === id);
   const inWork = r.view === 'practice' && r.a;
   const resume = findItem(S.cur, S.pads);
+  const explicitTrack = r.a === 'practical' || r.a === 'advanced'
+    ? r.a
+    : r.view === 'plan' && r.a ? 'advanced' : null;
 
   useEffect(() => {
     if (getEditorPref() === 'simple') return undefined;
@@ -83,9 +86,10 @@ export default function Shell({ onOut, onShowAuth }) {
   useEffect(() => {
     document.getElementById('main')?.scrollTo(0, 0);
     setOpen(false);
-    if (r.view && (S.last !== path || (inWork && exists(r.a) && S.cur !== r.a))) {
+    if (r.view && (S.last !== path || (inWork && exists(r.a) && S.cur !== r.a) || (explicitTrack && S.planTrack !== explicitTrack))) {
       up(n => {
         n.last = path;
+        if (explicitTrack) n.planTrack = explicitTrack;
         if (inWork && exists(r.a)) n.cur = r.a;
       });
     }
@@ -147,9 +151,24 @@ export default function Shell({ onOut, onShowAuth }) {
   let V = null;
   switch (r.view) {
     case 'dashboard': V = <Dashboard go={go} />; break;
-    case 'plan': V = <Plan day={r.a ? +r.a : null} tab={r.b} />; break;
-    case 'qa': V = <QA />; break;
-    case 'coding': V = <CodingBank go={go} />; break;
+    case 'plan': {
+      const isTrackPath = r.a === 'practical' || r.a === 'advanced';
+      const track = isTrackPath ? r.a : (r.a ? 'advanced' : (S.planTrack || 'practical'));
+      const day = isTrackPath ? (r.b ? +r.b : null) : (r.a ? +r.a : null);
+      const tab = isTrackPath ? r.c : r.b;
+      V = <Plan key={track} track={track} day={day} tab={tab} />;
+      break;
+    }
+    case 'qa': {
+      const track = r.a === 'practical' || r.a === 'advanced' ? r.a : (S.planTrack || 'practical');
+      V = <QA key={track} track={track} />;
+      break;
+    }
+    case 'coding': {
+      const track = r.a === 'practical' || r.a === 'advanced' ? r.a : (S.planTrack || 'practical');
+      V = <CodingBank key={track} track={track} go={go} />;
+      break;
+    }
     case 'revision': V = <Revision go={go} />; break;
     case 'library': V = <Library go={go} />; break;
     case 'practice':
@@ -177,7 +196,11 @@ export default function Shell({ onOut, onShowAuth }) {
       <header>
         <button className="bt menu" onClick={() => setOpen(!open)} aria-label="Menu">☰</button>
         <Link to="/dashboard" className="logo">Forjix<b>_</b></Link>
-        <span id="crumb">{crumb}</span>
+        <span id="crumb">{r.view === 'plan'
+          ? ((r.a === 'practical' || r.a === 'advanced')
+              ? (r.a === 'practical' ? 'Practical' : 'Advanced') + ' Plan' + (r.b ? ' · Day ' + r.b : '')
+              : r.a ? 'Advanced Plan · Day ' + r.a : 'Practical 15-Day Plan')
+          : crumb}</span>
         <span id="sv" className="hide-m">{sv}</span>
         <span className="pg" title="Current streak">🔥 {stats(S.days).current}</span>
 
@@ -238,27 +261,31 @@ export default function Shell({ onOut, onShowAuth }) {
         {GROUPS.map(([g, items]) => (
           <div key={g}>
             <h4>{g}</h4>
-            {items.map(([k, ic, t]) => (
-              <Link
-                key={k}
-                to={'/' + k}
-                className={'it' + (r.view === k ? ' on' : '')}
-                aria-current={r.view === k ? 'page' : undefined}
-              >
-                {ic} {t}
-              </Link>
-            ))}
+            {items.map(([k, ic, t]) => {
+              const track = S.planTrack || 'practical';
+              const to = k === 'plan' && track === 'advanced'
+                ? '/plan/advanced'
+                : (k === 'qa' || k === 'coding') ? '/' + k + '/' + track : '/' + k;
+              return (
+                <Link
+                  key={k}
+                  to={to}
+                  className={'it' + (r.view === k ? ' on' : '')}
+                  aria-current={r.view === k ? 'page' : undefined}
+                >
+                  {ic} {t}
+                </Link>
+              );
+            })}
           </div>
         ))}
 
-        <h4>
-          Scratchpads
-          <span>
-            <button onClick={() => addPad('js')}>+ JS</button>
-            <button onClick={() => addPad('html')}>+ HTML</button>
-            <button onClick={() => addPad('react')}>+ React</button>
-          </span>
-        </h4>
+        <h4 className="scratchpad-title">Scratchpads</h4>
+        <div className="scratchpad-actions" aria-label="Create scratchpad">
+          <button title="Create JavaScript scratchpad" onClick={() => addPad('js')}>+ JS</button>
+          <button title="Create HTML scratchpad" onClick={() => addPad('html')}>+ HTML</button>
+          <button title="Create React scratchpad" onClick={() => addPad('react')}>+ React</button>
+        </div>
 
         {S.pads.map(p => (
           <div key={p.id} className="padrow">

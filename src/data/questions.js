@@ -1,3 +1,5 @@
+import { practicalQuestions } from './practical/questions.js';
+
 export const questions = [
   {
     "id": "q-closure",
@@ -964,3 +966,5 @@ export const questions = [
     "misconceptions": "Claiming you fixed a bug alone in 5 minutes with zero investigation, or fabricating unverifiable metrics like \"increased revenue by 40%\". Focus on the engineering investigation and fix."
   }
 ];
+
+export const allQuestions = [...questions, ...practicalQuestions];

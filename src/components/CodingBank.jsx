@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useApp } from '../store.jsx';
-import { problems } from '../data/problems.js';
+import { problems as advancedProblems } from '../data/problems.js';
+import { practicalProblems } from '../data/practical/problems.js';
 import { bump } from '../lib/util.js';
+import TrackSwitch from './TrackSwitch.jsx';
 
-export default function CodingBank({ go }) {
+export default function CodingBank({ go, track = 'practical' }) {
   const { S, up, say } = useApp();
+  const problems = track === 'practical' ? practicalProblems : advancedProblems;
   const [selectedId, setSelectedId] = useState(null);
   const [cat, setCat] = useState('All');
   const [diff, setDiff] = useState('All');
@@ -59,6 +62,12 @@ export default function CodingBank({ go }) {
       <p className="mu">
         Structured patterns and interview staples for React and frontend developers. Follow the framework: 
         <b> Understand → Brute force → Edge cases → Optimize → Explain complexity → Discuss trade-offs.</b>
+      </p>
+
+      <TrackSwitch track={track} practicalTo="/coding/practical" advancedTo="/coding/advanced" subject="coding problem bank" />
+
+      <p className="mu" style={{ marginTop: -8 }}>
+        {track === 'practical' ? 'Exercises mapped to the practical 15-day schedule.' : 'Problems from the original Advanced coding bank.'}
       </p>
 
       {/* Filter toolbar */}
@@ -158,7 +167,7 @@ export default function CodingBank({ go }) {
                     </b>
                     <span className="pill">{p.cat}</span>
                     <span className={'pill' + (p.priority === 'P1' ? ' adv' : '')}>
-                      {p.priority} {p.priority === 'P1' ? 'Essential' : ''}
+                      {p.priority} {p.priority === 'P1' ? 'Essential' : p.priority === 'P2' ? 'Follow-up' : 'Advanced'}
                     </span>
                     <span className={'pill' + (p.difficulty === 'Hard' ? ' warn' : '')}>
                       {p.difficulty}
@@ -183,7 +192,7 @@ export default function CodingBank({ go }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <span className="pill">{selectedProblem.cat}</span>{' '}
-                <span className="pill adv">{selectedProblem.priority} Essential</span>{' '}
+                <span className="pill adv">{selectedProblem.priority} {selectedProblem.priority === 'P1' ? 'Essential' : selectedProblem.priority === 'P2' ? 'Follow-up' : 'Advanced'}</span>{' '}
                 <span className="pill">{selectedProblem.difficulty}</span>
                 <h1 style={{ marginTop: 8 }}>{selectedProblem.title}</h1>
               </div>

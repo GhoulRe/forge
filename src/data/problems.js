@@ -1,4 +1,6 @@
 // Forjix — Comprehensive Coding Problem Bank (74 Problems)
+import { practicalProblems } from './practical/problems.js';
+
 export const problems = [
   {
     "id": "p1",
@@ -2335,3 +2337,5 @@ export const problems = [
     "starter": "// Dashboard or product listing: design sketch\n// Describe the component tree, state ownership, API calls, loading and error states, and performance choices.\n\nfunction App() {\n  return <div>Build Dashboard or product listing: design sketch here</div>;\n}\n"
   }
 ];
+
+export const allProblems = [...problems, ...practicalProblems];

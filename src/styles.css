@@ -228,6 +228,69 @@ header {
   color: var(--ac);
 }
 
+#nav .scratchpad-title {
+  margin-bottom: 4px;
+}
+
+.scratchpad-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0 4px 8px;
+}
+
+.scratchpad-actions button {
+  min-width: 0;
+  margin: 0;
+  padding: 4px 3px;
+  border: 1px solid var(--ln);
+  border-radius: 6px;
+  background: var(--p2);
+  color: var(--tx);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.scratchpad-actions button:hover {
+  border-color: var(--ac);
+  color: var(--ac);
+}
+
+.padrow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.padrow .it {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.padrow .delpad {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--mu);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.padrow .delpad:hover {
+  border-color: color-mix(in srgb, var(--bad) 40%, var(--ln));
+  background: color-mix(in srgb, var(--bad) 10%, var(--pn));
+  color: var(--bad);
+}
+
 .it {
   display: flex;
   gap: 10px;
@@ -322,6 +385,8 @@ header {
 
 .page {
   padding: 28px clamp(18px, 3vw, 44px) 60px;
+  width: 100%;
+  min-width: 0;
   max-width: 1120px;
 }
 
@@ -696,14 +761,52 @@ header {
 .res { min-width: 0; }
 .resources-tab > h3 { margin-top: 24px; }
 
+.plan-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content minmax(220px, 260px);
+  align-items: start;
+  gap: 8px;
+  min-width: 0;
+  margin: 16px 0;
+}
+
+.plan-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.plan-filters input[type="search"] {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  flex: none;
+}
+
+@media (max-width: 1150px) {
+  .plan-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1150px) {
+  .plan-day-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* Day Plan Cards Grid */
 .g3 {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: 14px;
+  min-width: 0;
 }
 
 .dc {
+  min-width: 0;
   background: var(--pn);
   border: 1px solid var(--ln);
   border-radius: 14px;
@@ -720,6 +823,7 @@ header {
 }
 
 .dc h3 {
+  overflow-wrap: anywhere;
   margin: 8px 0 4px;
   font-size: 15px;
   font-weight: 700;
@@ -727,6 +831,7 @@ header {
 }
 
 .dc p {
+  overflow-wrap: anywhere;
   margin: 0 0 10px;
   font-size: 13px;
   color: var(--mu);
@@ -1207,6 +1312,76 @@ input:focus, textarea:focus, select:focus {
 #toast.on {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+.plan-day-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.plan-day-top .plan-track-control {
+  margin-top: 0;
+}
+
+.plan-day-top .back {
+  order: -1;
+}
+
+.plan-track-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 18px;
+  padding: 7px 11px;
+  border: 1px solid var(--ln);
+  border-radius: 999px;
+  background: var(--pn);
+  color: var(--mu);
+  font-size: 13px;
+}
+
+.plan-track-control .selected {
+  color: var(--tx);
+  font-weight: 700;
+}
+
+.plan-track-switch {
+  display: inline-flex;
+  align-items: center;
+  width: 46px;
+  height: 26px;
+  padding: 3px;
+  border: 1px solid var(--ln);
+  border-radius: 999px;
+  background: var(--p2);
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.plan-track-switch[aria-checked="true"] {
+  border-color: color-mix(in srgb, var(--ac) 65%, var(--ln));
+  background: color-mix(in srgb, var(--ac) 28%, var(--p2));
+}
+
+.plan-track-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--mu);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.plan-track-switch[aria-checked="true"] .plan-track-thumb {
+  transform: translateX(19px);
+  background: var(--ac);
+}
+
+.plan-track-switch:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 3px;
 }
 
 /* Day Tabs */

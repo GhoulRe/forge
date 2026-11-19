@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { useApp } from '../store.jsx';
-import { questions } from '../data/questions.js';
+import { questions as advancedQuestions, allQuestions } from '../data/questions.js';
+import { practicalQuestions } from '../data/practical/questions.js';
 import { bump } from '../lib/util.js';
+import TrackSwitch from './TrackSwitch.jsx';
 
-export default function QA() {
+export default function QA({ track = 'practical' }) {
   const { S, up, say } = useApp();
+  const questions = track === 'practical' ? practicalQuestions : advancedQuestions;
+  const questionRows = questions.map(x => ({ ...x, i: allQuestions.findIndex(q => q.id === x.id) }));
   const [cat, setCat] = useState('All');
   const [priority, setPriority] = useState('All');
   const [q, setQ] = useState('');
@@ -16,10 +20,10 @@ export default function QA() {
   const count = c => c === 'All'
     ? questions.length
     : c === 'Needs practice'
-      ? questions.filter((_, i) => st(i) === 'review').length
+      ? questionRows.filter(x => st(x.i) === 'review').length
       : questions.filter(x => x.cat === c).length;
 
-  const list = questions.map((x, i) => ({ ...x, i })).filter(x => {
+  const list = questionRows.filter(x => {
     const matchesCat = cat === 'All'
       || (cat === 'Needs practice' ? st(x.i) === 'review' : x.cat === cat);
     const matchesPriority = priority === 'All' || x.priority === priority;
@@ -41,16 +45,16 @@ export default function QA() {
     setCat('All');
     setPriority('All');
     setQ('');
-    const i = Math.floor(Math.random() * questions.length);
+    const selected = questionRows[Math.floor(Math.random() * questionRows.length)];
     setOpen({});
-    setFlash(i);
+    setFlash(selected.i);
     say('Answer out loud first, then check the spoken guide');
-    setTimeout(() => document.getElementById('q' + i)?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 50);
+    setTimeout(() => document.getElementById('q' + selected.i)?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 50);
     setTimeout(() => setFlash(null), 1800);
   };
 
-  const confidentCount = questions.filter((_, i) => st(i) === 'known').length;
-  const reviewCount = questions.filter((_, i) => st(i) === 'review').length;
+  const confidentCount = questionRows.filter(x => st(x.i) === 'known').length;
+  const reviewCount = questionRows.filter(x => st(x.i) === 'review').length;
 
   return (
     <div className="page">
@@ -59,6 +63,12 @@ export default function QA() {
       <p className="mu">
         {confidentCount}/{questions.length} confident · {reviewCount} flagged for practice.
         Crafted for speaking out loud in React developer interviews (3–4 YOE).
+      </p>
+
+      <TrackSwitch track={track} practicalTo="/qa/practical" advancedTo="/qa/advanced" subject="interview question bank" />
+
+      <p className="mu" style={{ marginTop: -8 }}>
+        {track === 'practical' ? 'Questions aligned to topics in your practical readiness guide.' : 'Questions from the original Advanced interview bank.'}
       </p>
 
       {/* Action / Search bar */}

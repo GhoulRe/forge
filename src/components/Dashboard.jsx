@@ -1,7 +1,7 @@
 import { useApp } from '../store.jsx';
 import { days } from '../data/days.js';
-import { questions } from '../data/questions.js';
-import { problems } from '../data/problems.js';
+import { allQuestions as questions } from '../data/questions.js';
+import { allProblems as problems } from '../data/problems.js';
 import { lessons, challenges, rounds, findItem, titleOf } from '../data/items.js';
 import { ALL_TOPICS } from '../data/domains.js';
 import { stats, today, key } from '../lib/util.js';
@@ -104,7 +104,7 @@ export default function Dashboard({ go }) {
       <div className="panel" style={{ margin: '18px 0', padding: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div>
-            <b style={{ fontSize: 15 }}>15-Day Interview Sprint Roadmap</b>
+            <b style={{ fontSize: 15 }}>Advanced Track 15-Day Roadmap</b>
             <small className="mu" style={{ display: 'block' }}>
               Target: React Developer (3–4 YOE) · {completedDays}/15 days completed ({Math.round(completedDays / 15 * 100)}%)
             </small>

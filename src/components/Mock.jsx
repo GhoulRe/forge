@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as zero from '../lib/zero.js';
 import { useApp } from '../store.jsx';
-import { questions } from '../data/plan.js';
+import { allQuestions as questions } from '../data/plan.js';
 import { challenges } from '../data/items.js';
 import { bump } from '../lib/util.js';
 import Workspace from './Workspace.jsx';

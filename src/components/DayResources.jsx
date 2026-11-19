@@ -5,9 +5,10 @@ import { SUGGEST, safeUrl } from '../lib/daycode.js';
 // Your own links and notes for the day, plus a few trusted starting points you can add with one click.
 export default function DayResources({ d }) {
   const { S, up, say } = useApp();
+  const key = d.key ?? d.n;
   const [t, setT] = useState(''), [u, setU] = useState(''), [note, setNote] = useState('');
-  const list = S.dres[d.n] || [];
-  const put = r => up(n => { n.dres[d.n] = [...(n.dres[d.n] || []), { ...r, id: 'r' + Date.now() }]; });
+  const list = S.dres[key] || [];
+  const put = r => up(n => { n.dres[key] = [...(n.dres[key] || []), { ...r, id: 'r' + Date.now() }]; });
   const add = e => {
     e.preventDefault();
     const url = safeUrl(u);
@@ -25,7 +26,7 @@ export default function DayResources({ d }) {
       </form>
       {list.length ? list.map(r => (
         <div key={r.id} className="res"><div><a href={r.u} target="_blank" rel="noopener noreferrer">{r.t} ↗</a>{r.note && <small className="mu">{r.note}</small>}</div>
-          <button className="bt" aria-label="Remove resource" onClick={() => up(n => { n.dres[d.n] = n.dres[d.n].filter(x => x.id !== r.id); })}>✕</button></div>))
+          <button className="bt" aria-label="Remove resource" onClick={() => up(n => { n.dres[key] = n.dres[key].filter(x => x.id !== r.id); })}>✕</button></div>))
         : <p className="mu">No resources yet. Add articles, videos or docs you used so you can find them again.</p>}
       {sug.length > 0 && <><h3>Suggested starting points</h3><div className="hd">{sug.map(([n, url]) => <button key={url} className="bt" onClick={() => put({ t: n, u: url, note: '' })}>+ {n}</button>)}</div></>}
     </div>

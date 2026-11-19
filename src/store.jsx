@@ -10,7 +10,7 @@ export const DEF = () => ({
   tasks: {}, criterion: {}, recalls: {},     // 15-day plan: task checks, completion criteria, recall scores
   dnotes: {}, qs: {}, notes: {},            // day notes, Q&A confidence ('known' | 'review'), free notes
   topics: {}, mocks: [], games: {}, chat: {},
-  unplugged: false, goal: 3,
+  unplugged: false, goal: 3, planTrack: 'practical',
   dcode: {}, dres: {}, dn: {}, model: '', last: '',
   ts: 0,
 });

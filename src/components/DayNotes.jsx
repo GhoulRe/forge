@@ -17,17 +17,18 @@ const TOOLS = [['H', '## ', '', 'Heading'], ['B', '**', '**', 'Bold'], ['I', '*'
 // Proper notes for a day: several markdown notes, edit/preview, code blocks you can copy or save as snippets.
 export default function DayNotes({ d }) {
   const { S, up, say } = useApp();
-  const list = S.dn[d.n];
+  const key = d.key ?? d.n;
+  const list = S.dn[key];
   const { fs, toggle: toggleFs, ref: notesRef } = useFullscreen();
   useEffect(() => { let on = true; if (!cmFailed && getEditorPref() !== 'simple') loadCM().then(c => on && setCM(() => c), () => on && setSimple(true)); return () => { on = false; }; }, []);
   const [sel, setSel] = useState(null), [view, setView] = useState(false), [simple, setSimple] = useState(cmFailed || getEditorPref() === 'simple'), [CM, setCM] = useState(null), ta = useRef(), cm = useRef();
   useEffect(() => { // first visit: bring any older single note across
-    if (!list) up(n => { const old = n.dnotes[d.n]; n.dn[d.n] = old ? [{ id: 'n0', t: 'Quick notes', b: old, ts: Date.now() }] : []; delete n.dnotes[d.n]; });
-  }, [d.n]);
+    if (!list) up(n => { const old = n.dnotes[key]; n.dn[key] = old ? [{ id: 'n0', t: 'Quick notes', b: old, ts: Date.now() }] : []; delete n.dnotes[key]; });
+  }, [key]);
   const notes = list || [], note = notes.find(x => x.id === sel) || notes[0];
   const html = useMemo(() => (note ? md(note.b) : { html: '', blocks: [] }), [note?.b]);
-  const edit = (id, f) => up(n => { const x = n.dn[d.n].find(y => y.id === id); f(x); x.ts = Date.now(); });
-  const add = () => { const id = 'n' + Date.now(); up(n => { n.dn[d.n] = [...(n.dn[d.n] || []), { id, t: 'Untitled note', b: TEMPLATE, ts: Date.now() }]; }); setSel(id); setView(false); };
+  const edit = (id, f) => up(n => { const x = n.dn[key].find(y => y.id === id); f(x); x.ts = Date.now(); });
+  const add = () => { const id = 'n' + Date.now(); up(n => { n.dn[key] = [...(n.dn[key] || []), { id, t: 'Untitled note', b: TEMPLATE, ts: Date.now() }]; }); setSel(id); setView(false); };
   const ins = (pre, post, ph) => {
     const v2 = cm.current; // CodeMirror editor, when it is active
     if (v2) { const s = v2.state.selection.main, mid = v2.state.sliceDoc(s.from, s.to) || ph || ''; v2.dispatch({ changes: { from: s.from, to: s.to, insert: pre + mid + post }, selection: { anchor: s.from + pre.length, head: s.from + pre.length + mid.length } }); v2.focus(); return; }
@@ -39,7 +40,7 @@ export default function DayNotes({ d }) {
     const b = e.target.closest('[data-act]'); if (!b) return;
     const blk = html.blocks[+b.dataset.i];
     if (b.dataset.act === 'copy') { navigator.clipboard?.writeText(blk.code); say('Copied'); }
-    else { up(n => { n.dcode[d.n] = [...(n.dcode[d.n] || seed(d)), { id: 'x' + Date.now(), t: (note.t || 'Note') + ' · snippet', lang: blk.lang, code: blk.code }]; }); say('Saved to the Code tab'); }
+    else { up(n => { n.dcode[key] = [...(n.dcode[key] || seed(d)), { id: 'x' + Date.now(), t: (note.t || 'Note') + ' · snippet', lang: blk.lang, code: blk.code }]; }); say('Saved to the Code tab'); }
   };
   return (
     <div ref={notesRef} className={`tab-content daynotes-wrap ${fs ? 'fs-focus' : ''}`}>
@@ -49,7 +50,7 @@ export default function DayNotes({ d }) {
           <input className="stitle" value={note.t} onChange={e => edit(note.id, x => { x.t = e.target.value; })} aria-label="Note title" />
           <button className={'bt' + (!view ? ' pri' : '')} onClick={() => setView(false)}>Edit</button><button className={'bt' + (view ? ' pri' : '')} onClick={() => setView(true)}>Preview</button>
           <button className={'bt' + (fs ? ' pri' : '')} onClick={toggleFs} title={fs ? 'Exit full screen (Esc)' : 'Full screen focus (Esc to exit)'} aria-label={fs ? 'Exit full screen' : 'Full screen'}>{fs ? '↙ Exit full screen' : '⛶ Full screen'}</button>
-          <button className="bt" aria-label="Delete note" onClick={() => { if (confirm('Delete this note?')) { up(n => { n.dn[d.n] = n.dn[d.n].filter(x => x.id !== note.id); }); setSel(null); } }}>🗑</button>
+          <button className="bt" aria-label="Delete note" onClick={() => { if (confirm('Delete this note?')) { up(n => { n.dn[key] = n.dn[key].filter(x => x.id !== note.id); }); setSel(null); } }}>🗑</button>
         </div>
         {view ? <div className="mdv" onClick={act} dangerouslySetInnerHTML={{ __html: html.html || '<p class="mu">Nothing written yet.</p>' }} /> : <>
           <div className="tools">{TOOLS.map(([l, a, b, t]) => <button key={t} className="bt" title={t} aria-label={t} onClick={() => ins(a, b, t === 'Heading' ? 'Heading' : t === 'Code block' ? 'code' : t === 'Link' ? 'text' : '')}>{l}</button>)}</div>
