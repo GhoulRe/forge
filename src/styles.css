@@ -634,6 +634,42 @@ header {
 .snip2 > .hd { align-items: center; }
 .snip2 .stitle { flex: 1 1 180px; min-width: 150px; }
 .sned { height: 300px; min-height: 220px; overflow: hidden; border: 1px solid var(--ln); border-radius: 9px; }
+.sned > .ed { height: 100%; min-height: 0; }
+.sned .cmhost, .sned .cm-editor { height: 100%; min-height: 0; }
+.sned .cm-scroller, .sned .ed textarea {
+  overflow-y: scroll !important;
+  scrollbar-color: #596170 var(--pn);
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+.sned .cm-scroller::-webkit-scrollbar-track,
+.sned .ed textarea::-webkit-scrollbar-track { background: var(--pn); }
+.sned .cm-scroller::-webkit-scrollbar-thumb,
+.sned .ed textarea::-webkit-scrollbar-thumb { border-color: var(--pn); }
+.snip2.fs-focus, .snip2:fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100vw;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 14px;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg);
+}
+.snip2.fs-focus > .hd, .snip2:fullscreen > .hd { flex: none; }
+.snip2.fs-focus .sned, .snip2:fullscreen .sned { flex: 1 1 auto; height: auto; min-height: 0; }
+.snip2.fs-focus .sned > .ed, .snip2:fullscreen .sned > .ed { height: 100%; min-height: 0; }
+.snip2.fs-focus .sned .cmhost, .snip2:fullscreen .sned .cmhost,
+.snip2.fs-focus .sned .cm-editor, .snip2:fullscreen .sned .cm-editor { height: 100%; min-height: 0; }
+.snip2.fs-focus .sout, .snip2:fullscreen .sout { flex: none; max-height: 22vh; }
+.snip2.fs-focus .sfr, .snip2:fullscreen .sfr { flex: 1 1 35vh; min-height: 120px; height: auto; margin: 0; }
 .sout { min-height: 44px; max-height: 180px; overflow: auto; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--ln); border-radius: 9px; background: var(--bg); font: 12px/1.6 ui-monospace, monospace; }
 .sfr { width: 100%; height: 300px; margin-top: 8px; border: 1px solid var(--ln); border-radius: 9px; background: #fff; }
 
