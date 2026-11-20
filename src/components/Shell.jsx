@@ -228,11 +228,10 @@ export default function Shell({ onOut, onShowAuth }) {
         </button>
 
         <button
-          className="bt"
+          className="bt accent-toggle"
           onClick={toggleAccent}
           title={accent === 'mint' ? 'Switch to Classic Orange accent' : 'Switch to Mint accent'}
           aria-label="Switch accent color"
-          style={{ color: accent === 'mint' ? '#00dc82' : '#ff7849' }}
         >
           {accent === 'mint' ? '🟢' : '🟠'}
           <span className="hide-m"> {accent === 'mint' ? 'Mint' : 'Orange'}</span>

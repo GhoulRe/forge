@@ -127,7 +127,7 @@ export default function Dashboard({ go }) {
                   padding: '8px 4px',
                   borderRadius: 8,
                   border: isCurrent ? '2px solid var(--ac)' : '1px solid var(--ln)',
-                  background: isDone ? 'color-mix(in srgb, var(--ok) 15%, var(--pn))' : isCurrent ? 'var(--p2)' : 'var(--pn)',
+                  background: isCurrent ? 'var(--ac-soft-bg)' : isDone ? 'var(--ok-soft-bg)' : 'var(--pn)',
                   cursor: 'pointer'
                 }}
               >

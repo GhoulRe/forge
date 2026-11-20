@@ -9,11 +9,17 @@ function Snake({ onScore, best }) {
   const init = () => { g.current = { s: [[9, 9], [8, 9], [7, 9]], d: [1, 0], q: [], f: [13, 9] }; setScore(0); };
   const draw = () => {
     const c = cv.current.getContext('2d'), s = g.current;
-    c.fillStyle = '#15171c'; c.fillRect(0, 0, N * C, N * C);
-    c.fillStyle = '#ff8a4c'; c.fillRect(s.f[0] * C + 2, s.f[1] * C + 2, C - 4, C - 4);
-    c.fillStyle = '#4cd39b'; s.s.forEach(([x, y], i) => { c.globalAlpha = i ? 0.8 : 1; c.fillRect(x * C + 1, y * C + 1, C - 2, C - 2); }); c.globalAlpha = 1;
+    const theme = getComputedStyle(cv.current);
+    c.fillStyle = theme.getPropertyValue('--game-bg').trim(); c.fillRect(0, 0, N * C, N * C);
+    c.fillStyle = theme.getPropertyValue('--game-food').trim(); c.fillRect(s.f[0] * C + 2, s.f[1] * C + 2, C - 4, C - 4);
+    c.fillStyle = theme.getPropertyValue('--game-snake').trim(); s.s.forEach(([x, y], i) => { c.globalAlpha = i ? 0.8 : 1; c.fillRect(x * C + 1, y * C + 1, C - 2, C - 2); }); c.globalAlpha = 1;
   };
   useEffect(() => { init(); draw(); }, []);
+  useEffect(() => {
+    const observer = new MutationObserver(draw);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-accent'] });
+    return () => observer.disconnect();
+  }, []);
   const turn = d => { const s = g.current, last = s.q.length ? s.q[s.q.length - 1] : s.d; if (d[0] !== -last[0] || d[1] !== -last[1]) s.q.push(d); };
   useEffect(() => {
     if (mode !== 'play') return;
