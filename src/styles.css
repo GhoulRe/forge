@@ -986,25 +986,100 @@ input:focus, textarea:focus, select:focus {
 .daynotes-wrap .tools .bt { min-width: 38px; padding: 7px 10px; }
 .daynotes-wrap .mdbox { min-width: 0; height: clamp(260px, 42vh, 520px); margin: 0 0 6px; overflow: hidden; border: 1px solid var(--ln); border-radius: 10px; background: var(--pn); }
 .daynotes-wrap .ed { height: 100%; background: var(--pn); }
+.daynotes-wrap .cmhost, .daynotes-wrap .cm-editor { height: 100%; min-height: 0; }
+.daynotes-wrap .cm-scroller, .daynotes-wrap .ed textarea {
+  overflow-y: scroll !important;
+  scrollbar-color: #596170 var(--pn);
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+.daynotes-wrap .cm-scroller::-webkit-scrollbar-track,
+.daynotes-wrap .ed textarea::-webkit-scrollbar-track { background: var(--pn); }
+.daynotes-wrap .cm-scroller::-webkit-scrollbar-thumb,
+.daynotes-wrap .ed textarea::-webkit-scrollbar-thumb { border-color: var(--pn); }
 .daynotes-wrap .ed pre, .daynotes-wrap .ed textarea { font-family: inherit; font-size: 14.5px; line-height: 1.75; padding: 14px 18px; }
 .daynotes-wrap .ed textarea { color: transparent; -webkit-text-fill-color: transparent; caret-color: var(--tx); }
-.daynotes-wrap .mdv { min-height: 260px; max-height: 60vh; overflow: auto; padding: 16px 20px; margin: 8px 0; border: 1px solid var(--ln); border-radius: 10px; background: var(--pn); line-height: 1.75; overflow-wrap: anywhere; }
+.daynotes-wrap .mdv { min-height: 260px; max-height: 60vh; overflow: auto; scrollbar-color: #596170 var(--pn); scrollbar-width: thin; scrollbar-gutter: stable; padding: 16px 20px; margin: 8px 0; border: 1px solid var(--ln); border-radius: 10px; background: var(--pn); line-height: 1.75; overflow-wrap: anywhere; }
 .daynotes-wrap .mdv h1, .daynotes-wrap .mdv h2, .daynotes-wrap .mdv h3 { color: var(--tx); }
 .daynotes-wrap .mdv pre { overflow: auto; padding: 12px; background: var(--bg); border: 1px solid var(--ln); border-radius: 8px; }
 .daynotes-wrap > small { display: block; margin-top: 6px; }
-.daynotes-wrap.fs-focus { position: fixed; inset: 12px; z-index: 40; overflow: auto; padding: 20px; margin: 0; background: var(--bg); border: 1px solid var(--ln); border-radius: 14px; box-shadow: 0 20px 80px #000a; }
-.daynotes-wrap.fs-focus .mdbox { height: calc(100vh - 240px); }
+.daynotes-wrap.fs-focus {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  padding: 14px;
+  margin: 0;
+  background: var(--bg);
+}
+.daynotes-wrap.fs-focus > .hd { flex: 0 0 auto; }
+.daynotes-wrap.fs-focus .mdbox { flex: 1 1 0; height: auto; min-height: 0; margin: 0; }
+.daynotes-wrap.fs-focus .mdv { flex: 1 1 0; min-height: 0; max-height: none; overflow-y: scroll; scrollbar-gutter: stable; margin: 0; }
+.daynotes-wrap.fs-focus > small { flex: 0 0 auto; }
 
 @media (max-width: 760px) {
   .rform { grid-template-columns: 1fr; }
   #main { grid-column: 1; }
-  .daynotes-wrap.fs-focus { inset: 6px; padding: 12px; }
-  .daynotes-wrap.fs-focus .mdbox { height: calc(100vh - 220px); }
+  .daynotes-wrap.fs-focus { padding: 10px; }
 }
 
 .na {
   width: 100%;
   resize: vertical;
+}
+
+.notes-mini-ta {
+  display: block;
+  min-height: 112px;
+  max-height: 42vh;
+  overflow-y: scroll !important;
+  scrollbar-color: #596170 var(--pn);
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+.notes-mini-ta::-webkit-scrollbar-track,
+.notes-fs-ta::-webkit-scrollbar-track { background: var(--pn); }
+.notes-mini-ta::-webkit-scrollbar-thumb,
+.notes-fs-ta::-webkit-scrollbar-thumb { border-color: var(--pn); }
+
+.notes-fs-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(12px, 2vw, 24px);
+  background: var(--bg);
+}
+.notes-fs-overlay > .hd { flex: 0 0 auto; align-items: center; min-width: 0; }
+.notes-fs-overlay > .hd > div:first-child { min-width: 0; }
+.notes-fs-overlay > .hd > div:last-child { align-items: center; justify-content: flex-end; min-width: 0; }
+.notes-fs-ta {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  height: auto;
+  resize: none;
+  overflow-y: scroll !important;
+  scrollbar-color: #596170 var(--pn);
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  background: var(--pn) !important;
+  line-height: 1.75;
 }
 
 /* ==========================================================================

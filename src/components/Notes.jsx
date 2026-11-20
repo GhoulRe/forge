@@ -53,16 +53,16 @@ export default function Notes() {
             <h3 style={{ margin: 0, padding: 0, border: 0 }}>{t}</h3>
             <button className="bt" onClick={() => setFsField(k)} title="Full screen focus mode (Esc to exit)">⛶ Full screen</button>
           </div>
-          <textarea className="na" rows={4} value={S.notes[k] || ''} onChange={e => set(k, e.target.value)} />
+          <textarea className="na notes-mini-ta" rows={4} value={S.notes[k] || ''} onChange={e => set(k, e.target.value)} />
         </div>
       ))}
       <div className="hd" style={{ margin: '22px 0 6px', justifyContent: 'space-between' }}>
         <h3 style={{ margin: 0, padding: 0, border: 0 }}>Scratch notes</h3>
         <button className="bt" onClick={() => setFsField('g')} title="Full screen focus mode (Esc to exit)">⛶ Full screen</button>
       </div>
-      <textarea className="na" rows={6} placeholder="Anything else…" value={S.notes.g || ''} onChange={e => set('g', e.target.value)} />
+      <textarea className="na notes-mini-ta" rows={6} placeholder="Anything else…" value={S.notes.g || ''} onChange={e => set('g', e.target.value)} />
       {fsField && (
-        <div className="notes-fs-overlay">
+        <div className="notes-fs-overlay" role="dialog" aria-modal="true" aria-label="Notes focus mode">
           <div className="hd" style={{ justifyContent: 'space-between', margin: '0 0 12px' }}>
             <div>
               <span className="pill" style={{ marginRight: 8 }}>Focus Mode</span>
